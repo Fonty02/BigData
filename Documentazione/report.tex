@@ -1,0 +1,100 @@
+\documentclass[a4paper,11pt]{article}
+
+% Pacchetti fondamentali
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[italian]{babel}
+\usepackage{geometry}
+\usepackage{amsmath, amssymb, amsfonts}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{booktabs}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{xcolor}
+
+% Impostazioni margini
+\geometry{
+    left=25mm,
+    right=25mm,
+    top=25mm,
+    bottom=25mm,
+}
+
+% Titolo e Autore
+\title{\textbf{Strategie di Green Fine-Tuning per la Predizione di Proprietà Molecolari}}
+\author{Bozza di Progetto}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+
+\section{Introduzione e Contesto}
+La predizione delle proprietà molecolari è difficile per la scarsità di dati etichettati e la complessità delle rappresentazioni; per questo si usano modelli pre-addestrati seguiti da fine-tuning. L'aumento di complessità dei modelli comporta però maggiori emissioni di CO2. Sebbene esistano studi su criteri di sostenibilità (es. early stopping basato su CO2) nei sistemi di raccomandazione, la loro applicazione al training molecolare rimane ancora poco esplorata.
+\section{Metodologia: Criterio di Green Early Stopping adattivo}
+
+L'idea è di effettuare prima un classico finetuning, andando a misurare le metriche e le emissioni.
+Successivamente verrà applicato un criterio di early-stopping del fine-tuning basato sulle emissioni.
+Questo sicuramente porterà a un calo di performance, ma l'idea è analizzare il trade-off tra riduzione performance e riduzione emissioni per capire quale fine-tuning è il piu ecologicamanente sostenibile.
+
+
+\subsection{Misurazione delle Emissioni}
+Le emissioni di carbonio ($E$) sono calcolate in tempo reale utilizzando la libreria \textit{CodeCarbon}, che stima il $CO_2$ equivalente ($CO_2\text{-eq}$) basandosi sul consumo energetico dell'hardware (GPU/CPU) e l'intensità di carbonio della rete elettrica locale.
+
+\subsection{Definizione dell'Adaptive Accuracy-Emission Ratio}
+
+
+Definiamo il rapporto di efficienza istantanea $AER\_{norm}$ all'epoca $i$ come:
+
+\begin{equation}
+AER\_{norm}(i) = \frac{\%\Delta \text{Performance}\_i}{\%\Delta \text{Emission}\_i}
+\end{equation}
+
+Dove:
+\begin{itemize}
+    \item $\%\Delta \text{Performance}\_i$: è la variazione percentuale della metrica di validazione (es. guadagno in ROC-AUC o riduzione percentuale del RSE) rispetto all'epoca $i-1$.
+    \item $\%\Delta \text{Emission}\_i$: è l'incremento percentuale delle emissioni cumulative rispetto all'epoca $i-1$.
+\end{itemize}
+
+\subsection{Criterio di Arresto Basato su Media Mobile}
+Invece di confrontare $AER\_{norm}$ con una soglia statica, lo confrontiamo con la sua stessa storia, rappresentata da una Media Mobile Esponenziale (EMA). Questo permette all'algoritmo di "imparare" la velocità di convergenza specifica del modello (sia esso un Transformer pesante o una GNN leggera).
+
+\begin{algorithm}
+\caption{AN-GES semplificato}
+\begin{algorithmic}[1]
+\State \textbf{Input:} $\alpha$ (smoothing, es. 0.9), $\beta$ (soglia, es. 0.2), $W$ (warm-up epoche)
+\State $EMA_{AER}\gets$ valore iniziale piccolo
+\For{epoca $i=1,2,\dots$}
+    \State calcola metrica di validazione e emissioni cumulative $E_i$
+    \If{$i>1$}
+        \State calcola $\%\Delta\text{Perf}_i$ e $\%\Delta\text{Emiss}_i$
+        \State $AER_{current}\gets \dfrac{\%\Delta\text{Perf}_i}{\%\Delta\text{Emiss}_i}$
+        \If{$i\ge W$}
+            \State $EMA_{AER}\gets \alpha\cdot AER_{current} + (1-\alpha)\cdot EMA_{AER}$
+            \If{$AER_{current} < \beta\cdot EMA_{AER}$}
+                \State \textbf{Stop Training}
+            \EndIf
+        \Else
+            \State accumula $AER_{current}$ per inizializzare $EMA_{AER}$
+        \EndIf
+    \EndIf
+\EndFor
+\end{algorithmic}
+\end{algorithm}
+
+\section{Disegno Sperimentale}
+
+\subsection{Dataset}
+Utilizzeremo i dataset della suite \textit{MoleculeNet}
+
+\subsection{Modelli Oggetto di Studio}
+Confronteremo l'efficacia del criterio AN-GES su due famiglie di modelli pre-addestrati, caratterizzati da profili energetici molto diversi:
+\begin{enumerate}
+    \item \textbf{Modelli 1D (Sequence-based):} Utilizzano stringhe SMILES/SELFIES. 
+    \item \textbf{Modelli 2D (Graph-based):} Utilizzano la topologia del grafo molecolare.
+\end{enumerate}
+
+
+\end{document}
