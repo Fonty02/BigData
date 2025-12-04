@@ -32,7 +32,7 @@
 
 
 \section{Introduzione e Contesto}
-La predizione delle proprietà molecolari è difficile per la scarsità di dati etichettati e la complessità delle rappresentazioni; per questo si usano modelli pre-addestrati seguiti da fine-tuning. L'aumento di complessità dei modelli comporta però maggiori emissioni di CO2. Sebbene esistano studi su criteri di sostenibilità (es. early stopping basato su CO2) nei sistemi di raccomandazione, la loro applicazione al training molecolare rimane ancora poco esplorata.
+La predizione delle proprietà molecolari è difficile per la scarsità di dati etichettati e la complessità delle rappresentazioni; per questo si usano modelli pre-addestrati seguiti da fine-tuning. L'aumento di complessità dei modelli comporta però maggiori emissioni di CO2. L'idea è di esplorare un criterio di early-stopping di fine-tuning di questi modelli pre-addestrati basato sulle emissioni.
 \section{Metodologia: Criterio di Green Early Stopping adattivo}
 
 L'idea è di effettuare prima un classico finetuning, andando a misurare le metriche e le emissioni.

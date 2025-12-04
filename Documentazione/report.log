@@ -1,4 +1,4 @@
-This is LuaHBTeX, Version 1.21.0 (MiKTeX 25.3) (format=lualatex 2025.3.29)  4 DEC 2025 13:36
+This is LuaHBTeX, Version 1.21.0 (MiKTeX 25.3) (format=lualatex 2025.3.29)  4 DEC 2025 14:23
  system commands enabled.
  file:line:error style messages enabled.
 **c:/Users/fonta/Desktop/Uni/Repo/BigD/Documentazione/report
@@ -667,10 +667,10 @@ Here is how much of LuaTeX's memory you used:
  546 words of node memory still in use:
    7 hlist, 2 vlist, 2 rule, 5 glue, 4 kern, 1 glyph, 14 attribute, 54 glue_spec
 , 9 attribute_list, 1 write nodes
-   avail lists: 2:1290,3:307,4:88,5:456,6:72,7:9104,8:55,9:467,10:14,11:1235
+   avail lists: 2:1290,3:304,4:88,5:450,6:72,7:8828,8:55,9:467,10:14,11:1163
  35986 multiletter control sequences out of 65536+600000
  52 fonts using 3267007 bytes
- 72i,9n,75p,554b,354s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 72i,9n,75p,486b,354s stack positions out of 10000i,1000n,20000p,200000b,200000s
 {C:/Users/fonta/AppData/Local/Programs/MiKTeX/fonts/enc/dvips/lm/lm-ec.enc}{C:/U
 sers/fonta/AppData/Local/Programs/MiKTeX/fonts/enc/dvips/lm/lm-ts1.enc}<C:/Users
 /fonta/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi10.pfb><
@@ -685,7 +685,7 @@ e1/public/lm/lmr10.pfb><C:/Users/fonta/AppData/Local/Programs/MiKTeX/fonts/type1
 /public/lm/lmr12.pfb><C:/Users/fonta/AppData/Local/Programs/MiKTeX/fonts/type1/p
 ublic/lm/lmr9.pfb><C:/Users/fonta/AppData/Local/Programs/MiKTeX/fonts/type1/publ
 ic/lm/lmri10.pfb>
-Output written on report.pdf (2 pages, 206714 bytes).
+Output written on report.pdf (2 pages, 206623 bytes).
 
 PDF statistics: 100 PDF objects out of 1000 (max. 8388607)
  15 named destinations out of 1000 (max. 131072)
