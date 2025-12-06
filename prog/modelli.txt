@@ -1,3 +1,0 @@
-CHEMBERTA-2 : DeepChem/ChemBERTa-77M-MLM
-CHEMERTA : seyonec/ChemBERTa-zinc-base-v1
-GRAPHMAE : microsoft/graphmae-base

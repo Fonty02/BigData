@@ -1,18 +1,23 @@
 \relax 
 \providecommand \babel@aux [2]{\global \let \babel@toc \@gobbletwo }
 \@nameuse{bbl@beforestart}
-\providecommand\hyper@newdestlabel[2]{}
-\providecommand\HyField@AuxAddToFields[1]{}
-\providecommand\HyField@AuxAddToCoFields[2]{}
 \babel@aux{italian}{}
 \babel@aux{italian}{}
-\@writefile{toc}{\contentsline {section}{\numberline {1}Introduzione e Contesto}{1}{section.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {2}Metodologia: Criterio di Green Early Stopping adattivo}{1}{section.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.1}Misurazione delle Emissioni}{1}{subsection.2.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.2}Definizione dell'Adaptive Accuracy-Emission Ratio}{1}{subsection.2.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.3}Criterio di Arresto Basato su Media Mobile}{1}{subsection.2.3}\protected@file@percent }
-\@writefile{loa}{\contentsline {algorithm}{\numberline {1}{\ignorespaces AN-GES semplificato}}{2}{algorithm.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {3}Disegno Sperimentale}{2}{section.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.1}Dataset}{2}{subsection.3.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.2}Modelli Oggetto di Studio}{2}{subsection.3.2}\protected@file@percent }
-\gdef \@abspage@last{2}
+\@writefile{toc}{\contentsline {section}{\numberline {1}Metodologia e Gestione dei Dati}{1}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.1}Preprocessing e Scaffold Splitting}{1}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.2}Meccanismo di Early Stopping (AER)}{1}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {2}Risultati Sperimentali}{1}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.1}Dataset BACE (Classificazione)}{1}{}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces Confronto su dataset BACE. In alcuni casi (ChemBERTa, SELFormer), la versione Early ha performato meglio, suggerendo che il training prolungato portava ad overfitting.}}{2}{}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces Curva ROC per ChemBERTa su BACE: confronto tra versione Classic ed Early Stopping}}{2}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.2}Dataset CEP (Regressione)}{2}{}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces Confronto su dataset CEP. Nota: Per RSE, un valore più basso indica una performance migliore. Una $\Delta $ Perf negativa indica un peggioramento dell'errore (aumento del RSE).}}{2}{}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Andamento del RSE su CEP per ChemBERTa: confronto tra versione Classic ed Early Stopping}}{3}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.3}Dataset Lipophilicity (Regressione)}{3}{}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {3}{\ignorespaces Confronto su Lipophilicity. Qui si nota il trade-off più marcato: grandi risparmi energetici corrispondono a una perdita significativa di precisione nel modello.}}{3}{}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces Andamento del RSE su Lipophilicity per ChemBERTa: confronto tra versione Classic ed Early Stopping}}{4}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.4}Dataset Malaria (Regressione)}{4}{}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {4}{\ignorespaces Confronto su Malaria. In questo dataset, l'Early Stopping ha spesso migliorato o mantenuto invariate le performance (RSE più basso o simile), suggerendo che i modelli tendono a saturare o overfittare rapidamente su questi dati.}}{4}{}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces Andamento del RSE su Malaria per ChemBERTa: confronto tra versione Classic ed Early Stopping}}{5}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {3}Conclusioni}{5}{}\protected@file@percent }
+\gdef \@abspage@last{5}

@@ -1,100 +1,158 @@
 \documentclass[a4paper,11pt]{article}
-
-% Pacchetti fondamentali
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 \usepackage[italian]{babel}
-\usepackage{geometry}
-\usepackage{amsmath, amssymb, amsfonts}
+\usepackage{amsmath}
+\usepackage{booktabs} % Per tabelle professionali
 \usepackage{graphicx}
-\usepackage{hyperref}
-\usepackage{booktabs}
-\usepackage{algorithm}
-\usepackage{algpseudocode}
+\usepackage{float}
+\usepackage{geometry}
 \usepackage{xcolor}
+\usepackage{caption}
 
-% Impostazioni margini
-\geometry{
-    left=25mm,
-    right=25mm,
-    top=25mm,
-    bottom=25mm,
-}
+\geometry{margin=2.5cm}
 
-% Titolo e Autore
-\title{\textbf{Strategie di Green Fine-Tuning per la Predizione di Proprietà Molecolari}}
-\author{Bozza di Progetto}
+\title{\textbf{Analisi degli Esperimenti di Green AI su Molecular Transformers}}
+\author{Report Tecnico}
 \date{\today}
 
 \begin{document}
 
 \maketitle
 
+\section{Metodologia e Gestione dei Dati}
 
-\section{Introduzione e Contesto}
-La predizione delle proprietà molecolari è difficile per la scarsità di dati etichettati e la complessità delle rappresentazioni; per questo si usano modelli pre-addestrati seguiti da fine-tuning. L'aumento di complessità dei modelli comporta però maggiori emissioni di CO2. L'idea è di esplorare un criterio di early-stopping di fine-tuning di questi modelli pre-addestrati basato sulle emissioni.
-\section{Metodologia: Criterio di Green Early Stopping adattivo}
+\subsection{Preprocessing e Scaffold Splitting}
+La gestione dei dataset chimici è stata effettuata utilizzando la libreria RDKit. Una fase critica del processo è la suddivisione dei dati in set di training, validazione e test. Invece di una suddivisione casuale, è stato implementato lo \textbf{Scaffold Splitting} (80/10/10).
 
-L'idea è di effettuare prima un classico finetuning, andando a misurare le metriche e le emissioni.
-Successivamente verrà applicato un criterio di early-stopping del fine-tuning basato sulle emissioni.
-Questo sicuramente porterà a un calo di performance, ma l'idea è analizzare il trade-off tra riduzione performance e riduzione emissioni per capire quale fine-tuning è il piu ecologicamanente sostenibile.
+Questa tecnica raggruppa le molecole in base al loro scafold di Murcko (la struttura centrale ciclica). Le molecole con lo stesso scaffold vengono assegnate allo stesso set. Ciò garantisce una valutazione più realistica della capacità di generalizzazione del modello, simulando la scoperta di nuove strutture chimiche distinte da quelle note. 
 
+L'algoritmo implementato include inoltre un controllo di robustezza (\textit{ensure\_min\_two\_classes}): nel caso in cui la suddivisione per scaffold produca un set di validazione o test con una sola classe (rendendo impossibile il calcolo della ROC-AUC), l'algoritmo ribilancia i set prelevando esempi specifici dal training set.
 
-\subsection{Misurazione delle Emissioni}
-Le emissioni di carbonio ($E$) sono calcolate in tempo reale utilizzando la libreria \textit{CodeCarbon}, che stima il $CO_2$ equivalente ($CO_2\text{-eq}$) basandosi sul consumo energetico dell'hardware (GPU/CPU) e l'intensità di carbonio della rete elettrica locale.
-
-\subsection{Definizione dell'Adaptive Accuracy-Emission Ratio}
-
-
-Definiamo il rapporto di efficienza istantanea $AER\_{norm}$ all'epoca $i$ come:
+\subsection{Meccanismo di Early Stopping (AER)}
+Per ridurre l'impronta di carbonio, è stato implementato un callback personalizzato basato sul rapporto adattivo tra accuratezza ed emissioni (AER - Adaptive Accuracy-Emission Ratio). Il training viene interrotto quando il guadagno marginale in performance non giustifica più il costo energetico marginale:
 
 \begin{equation}
-AER\_{norm}(i) = \frac{\%\Delta \text{Performance}\_i}{\%\Delta \text{Emission}\_i}
+    AER_t = \frac{\% \Delta \text{Performance}_t}{\% \Delta \text{Emissioni}_t}
 \end{equation}
 
-Dove:
+Il training si arresta se $AER_t < \beta \cdot \text{EMA}(AER_{t-1})$, dove $\beta$ è una soglia di tolleranza e EMA è la media mobile esponenziale.
+
+\section{Risultati Sperimentali}
+
+Di seguito vengono presentati i risultati per i quattro dataset analizzati. I modelli sono stati testati in configurazione "Classic" (fine-tuning completo) e "Early" (con arresto anticipato).
+
+\subsection{Dataset BACE (Classificazione)}
+Metriche utilizzate: ROC-AUC (maggiore è meglio).
+\vspace{0.3cm}
+
+\begin{table}[H]
+    \centering
+    \small
+    \begin{tabular}{lcccccc}
+        \toprule
+        \textbf{Modello} & \textbf{AUC (Classic)} & \textbf{AUC (Early)} & \textbf{$\Delta$ Perf.} & \textbf{CO$_2$eq (kg) C.} & \textbf{CO$_2$eq (kg) E.} & \textbf{$\Delta$ Emiss.} \\
+        \midrule
+        ChemBERTa   & 0.961 & 0.993 & \textcolor{blue}{+3.4\%} & $1.03 \times 10^{-3}$ & $3.70 \times 10^{-4}$ & \textbf{-63.9\%} \\
+        ChemBERTa-2 & 0.967 & 0.974 & \textcolor{blue}{+0.7\%} & $3.06 \times 10^{-4}$ & $2.50 \times 10^{-4}$ & \textbf{-18.3\%} \\
+        SELFormer   & 0.947 & 0.993 & \textcolor{blue}{+4.9\%} & $1.85 \times 10^{-3}$ & $5.62 \times 10^{-4}$ & \textbf{-69.6\%} \\
+        SMILES-BERT & 0.974 & 0.928 & \textcolor{red}{-4.7\%} & $1.87 \times 10^{-3}$ & $8.72 \times 10^{-4}$ & \textbf{-53.5\%} \\
+        \bottomrule
+    \end{tabular}
+    \caption{Confronto su dataset BACE. In alcuni casi (ChemBERTa, SELFormer), la versione Early ha performato meglio, suggerendo che il training prolungato portava ad overfitting.}
+\end{table}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{tradeoff_experiments_bace.png}
+    \caption{Curva ROC per ChemBERTa su BACE: confronto tra versione Classic ed Early Stopping}
+\end{figure}
+
+\subsection{Dataset CEP (Regressione)}
+Metriche utilizzate: RSE (Relative Squared Error - minore è meglio). 
+\vspace{0.3cm}
+
+\begin{table}[H]
+    \centering
+    \small
+    \begin{tabular}{lcccccc}
+        \toprule
+        \textbf{Modello} & \textbf{RSE (Classic)} & \textbf{RSE (Early)} & \textbf{$\Delta$ Perf.} & \textbf{CO$_2$eq (kg) C.} & \textbf{CO$_2$eq (kg) E.} & \textbf{$\Delta$ Emiss.} \\
+        \midrule
+        ChemBERTa   & 0.347 & 0.311 & \textcolor{blue}{+10.3\%} & $1.60 \times 10^{-2}$ & $3.37 \times 10^{-3}$ & \textbf{-78.9\%} \\
+        ChemBERTa-2 & 0.279 & 0.345 & \textcolor{red}{-23.6\%}  & $2.07 \times 10^{-3}$ & $6.08 \times 10^{-4}$ & \textbf{-70.6\%} \\
+        SELFormer   & 0.328 & 0.393 & \textcolor{red}{-19.8\%}  & $3.16 \times 10^{-2}$ & $6.51 \times 10^{-3}$ & \textbf{-79.4\%} \\
+        SMILES-BERT & 1.000 & 1.000 & \textit{Invar.}           & $3.25 \times 10^{-2}$ & $9.90 \times 10^{-3}$ & \textbf{-69.5\%} \\
+        \bottomrule
+    \end{tabular}
+    \caption{Confronto su dataset CEP. Nota: Per RSE, un valore più basso indica una performance migliore. Una $\Delta$ Perf negativa indica un peggioramento dell'errore (aumento del RSE).}
+\end{table}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{tradeoff_experiments_cep.png}
+    \caption{Andamento del RSE su CEP per ChemBERTa: confronto tra versione Classic ed Early Stopping}
+\end{figure}
+
+\subsection{Dataset Lipophilicity (Regressione)}
+Metriche utilizzate: RSE (minore è meglio).
+\vspace{0.3cm}
+
+\begin{table}[H]
+    \centering
+    \small
+    \begin{tabular}{lcccccc}
+        \toprule
+        \textbf{Modello} & \textbf{RSE (Classic)} & \textbf{RSE (Early)} & \textbf{$\Delta$ Perf.} & \textbf{CO$_2$eq (kg) C.} & \textbf{CO$_2$eq (kg) E.} & \textbf{$\Delta$ Emiss.} \\
+        \midrule
+        ChemBERTa   & 0.513 & 0.725 & \textcolor{red}{-41.3\%} & $2.43 \times 10^{-3}$ & $6.48 \times 10^{-4}$ & \textbf{-73.3\%} \\
+        ChemBERTa-2 & 0.547 & 0.699 & \textcolor{red}{-27.8\%} & $4.81 \times 10^{-4}$ & $2.86 \times 10^{-4}$ & \textbf{-40.5\%} \\
+        SELFormer   & 0.642 & 0.695 & \textcolor{red}{-8.3\%}  & $4.62 \times 10^{-3}$ & $1.11 \times 10^{-3}$ & \textbf{-76.0\%} \\
+        SMILES-BERT & 0.692 & 0.752 & \textcolor{red}{-8.7\%}  & $4.73 \times 10^{-3}$ & $1.57 \times 10^{-3}$ & \textbf{-66.7\%} \\
+        \bottomrule
+    \end{tabular}
+    \caption{Confronto su Lipophilicity. Qui si nota il trade-off più marcato: grandi risparmi energetici corrispondono a una perdita significativa di precisione nel modello.}
+\end{table}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{tradeoff_experiments_lipophilicity.png}
+    \caption{Andamento del RSE su Lipophilicity per ChemBERTa: confronto tra versione Classic ed Early Stopping}
+\end{figure}
+
+
+\subsection{Dataset Malaria (Regressione)}
+Metriche utilizzate: RSE (minore è meglio).
+\vspace{0.3cm}
+
+\begin{table}[H]
+    \centering
+    \small
+    \begin{tabular}{lcccccc}
+        \toprule
+        \textbf{Modello} & \textbf{RSE (Classic)} & \textbf{RSE (Early)} & \textbf{$\Delta$ Perf.} & \textbf{CO$_2$eq (kg) C.} & \textbf{CO$_2$eq (kg) E.} & \textbf{$\Delta$ Emiss.} \\
+        \midrule
+        ChemBERTa   & 0.926 & 0.931 & \textcolor{red}{-0.5\%}   & $5.49 \times 10^{-3}$ & $1.29 \times 10^{-3}$ & \textbf{-76.4\%} \\
+        ChemBERTa-2 & 0.995 & 0.870 & \textcolor{blue}{+12.6\%} & $8.40 \times 10^{-4}$ & $3.42 \times 10^{-4}$ & \textbf{-59.3\%} \\
+        SELFormer   & 1.068 & 0.991 & \textcolor{blue}{+7.2\%}  & $1.07 \times 10^{-2}$ & $2.31 \times 10^{-3}$ & \textbf{-78.3\%} \\
+        SMILES-BERT & 1.018 & 0.994 & \textcolor{blue}{+2.4\%}  & $1.10 \times 10^{-2}$ & $3.45 \times 10^{-3}$ & \textbf{-68.6\%} \\
+        \bottomrule
+    \end{tabular}
+    \caption{Confronto su Malaria. In questo dataset, l'Early Stopping ha spesso migliorato o mantenuto invariate le performance (RSE più basso o simile), suggerendo che i modelli tendono a saturare o overfittare rapidamente su questi dati.}
+\end{table}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{tradeoff_experiments_malaria.png}
+    \caption{Andamento del RSE su Malaria per ChemBERTa: confronto tra versione Classic ed Early Stopping}
+\end{figure}
+
+\section{Conclusioni}
+L'analisi dimostra che l'approccio \textit{Green AI} tramite Early Stopping adattivo permette di ridurre drasticamente le emissioni di CO$_2$eq (spesso tra il 60\% e l'80\%). 
+
 \begin{itemize}
-    \item $\%\Delta \text{Performance}\_i$: è la variazione percentuale della metrica di validazione (es. guadagno in ROC-AUC o riduzione percentuale del RSE) rispetto all'epoca $i-1$.
-    \item $\%\Delta \text{Emission}\_i$: è l'incremento percentuale delle emissioni cumulative rispetto all'epoca $i-1$.
+    \item Nei task di \textbf{classificazione} (BACE), la riduzione delle emissioni avviene senza penalizzare l'accuratezza, anzi talvolta migliorandola grazie alla prevenzione dell'overfitting.
+    \item Nei task di \textbf{regressione} (Lipophilicity, CEP), esiste un trade-off più tangibile: interrompere il training prematuramente può costare tra il 10\% e il 40\% in termini di errore (RSE), sebbene su dataset complessi come Malaria l'effetto sia mitigato.
 \end{itemize}
-
-\subsection{Criterio di Arresto Basato su Media Mobile}
-Invece di confrontare $AER\_{norm}$ con una soglia statica, lo confrontiamo con la sua stessa storia, rappresentata da una Media Mobile Esponenziale (EMA). Questo permette all'algoritmo di "imparare" la velocità di convergenza specifica del modello (sia esso un Transformer pesante o una GNN leggera).
-
-\begin{algorithm}
-\caption{AN-GES semplificato}
-\begin{algorithmic}[1]
-\State \textbf{Input:} $\alpha$ (smoothing, es. 0.9), $\beta$ (soglia, es. 0.2), $W$ (warm-up epoche)
-\State $EMA_{AER}\gets$ valore iniziale piccolo
-\For{epoca $i=1,2,\dots$}
-    \State calcola metrica di validazione e emissioni cumulative $E_i$
-    \If{$i>1$}
-        \State calcola $\%\Delta\text{Perf}_i$ e $\%\Delta\text{Emiss}_i$
-        \State $AER_{current}\gets \dfrac{\%\Delta\text{Perf}_i}{\%\Delta\text{Emiss}_i}$
-        \If{$i\ge W$}
-            \State $EMA_{AER}\gets \alpha\cdot AER_{current} + (1-\alpha)\cdot EMA_{AER}$
-            \If{$AER_{current} < \beta\cdot EMA_{AER}$}
-                \State \textbf{Stop Training}
-            \EndIf
-        \Else
-            \State accumula $AER_{current}$ per inizializzare $EMA_{AER}$
-        \EndIf
-    \EndIf
-\EndFor
-\end{algorithmic}
-\end{algorithm}
-
-\section{Disegno Sperimentale}
-
-\subsection{Dataset}
-Utilizzeremo i dataset della suite \textit{MoleculeNet}
-
-\subsection{Modelli Oggetto di Studio}
-Confronteremo l'efficacia del criterio AN-GES su due famiglie di modelli pre-addestrati, caratterizzati da profili energetici molto diversi:
-\begin{enumerate}
-    \item \textbf{Modelli 1D (Sequence-based):} Utilizzano stringhe SMILES/SELFIES. 
-    \item \textbf{Modelli 2D (Graph-based):} Utilizzano la topologia del grafo molecolare.
-\end{enumerate}
-
 
 \end{document}
