@@ -13,10 +13,8 @@ from transformers import AutoModel, AutoTokenizer, Trainer, TrainingArguments
 from transformers.modeling_outputs import SequenceClassifierOutput
 from datasets import Dataset
 from codecarbon import EmissionsTracker
-import logging
 from collections import defaultdict
-
-# --- RDKit Imports per Scaffold Splitting ---
+import logging
 try:
     from rdkit import Chem
     from rdkit.Chem.Scaffolds import MurckoScaffold
@@ -77,15 +75,10 @@ HYPERPARAMS = {
 
 # --- FUNZIONE PER SCAFFOLD SPLITTING PER TRANSFORMERS ---
 def scaffold_split(df, smiles_col='smiles', sizes=(0.8, 0.1, 0.1), seed=42):
-    """
-    Divide il dataset basandosi sugli scaffold di Murcko con stratificazione.
-    FIX: Sposta SCAFFOLD INTERI per mantenere l'integrità dello scaffold splitting.
-    """
     import random
     random.seed(seed)
     np.random.seed(seed)
     
-    # 1. Raggruppa molecole per scaffold
     valid_indices = []
     scaffolds = defaultdict(list)
     
@@ -98,10 +91,6 @@ def scaffold_split(df, smiles_col='smiles', sizes=(0.8, 0.1, 0.1), seed=42):
         else:
             print(f"Warning: Eliminata molecola con SMILES invalido all'indice {idx}")
 
-    df_valid = df.loc[valid_indices]
-    print(f"Molecole valide: {len(df_valid)}/{len(df)} ({len(df)-len(df_valid)} eliminate)")
-
-    # 2. Crea metadata per ogni scaffold
     scaffold_metadata = {}
     for scaffold, indices in scaffolds.items():
         labels = df.loc[indices, 'label'].values
@@ -109,13 +98,11 @@ def scaffold_split(df, smiles_col='smiles', sizes=(0.8, 0.1, 0.1), seed=42):
             'indices': indices,
             'size': len(indices),
             'labels': labels,
-            'label_counts': {int(l): int(np.sum(labels == l)) for l in np.unique(labels)}
+            'label_counts': {int(label): int(np.sum(labels == label)) for label in np.unique(labels)}
         }
     
-    # 3. Ordina scaffold per dimensione (decrescente)
     scaffold_sets = sorted(scaffold_metadata.items(), key=lambda x: x[1]['size'], reverse=True)
     
-    # 4. Distribuzione iniziale
     train_idxs, val_idxs, test_idxs = [], [], []
     train_scaffolds, val_scaffolds, test_scaffolds = [], [], []
     
@@ -134,7 +121,6 @@ def scaffold_split(df, smiles_col='smiles', sizes=(0.8, 0.1, 0.1), seed=42):
             test_idxs.extend(indices)
             test_scaffolds.append(scaffold)
     
-    # 5. Verifica e bilancia se necessario
     def get_label_distribution(indices):
         if not indices:
             return set()
@@ -149,7 +135,6 @@ def scaffold_split(df, smiles_col='smiles', sizes=(0.8, 0.1, 0.1), seed=42):
         val_labels = get_label_distribution(val_idxs)
         test_labels = get_label_distribution(test_idxs)
         
-        # FIX: Sposta SCAFFOLD INTERI, non singoli indici
         max_iterations = 50
         iteration = 0
         
@@ -157,33 +142,26 @@ def scaffold_split(df, smiles_col='smiles', sizes=(0.8, 0.1, 0.1), seed=42):
             iteration += 1
             moved = False
             
-            # Priorità: fixare il test set
             if len(test_labels) < 2:
                 missing_in_test = set(all_labels) - test_labels
                 target_label = list(missing_in_test)[0]
                 
-                # Cerca scaffold nel train che contiene la classe mancante
                 for scaffold in train_scaffolds:
                     info = scaffold_metadata[scaffold]
                     scaffold_labels = set(np.unique(info['labels']))
                     
-                    # Se questo scaffold contiene la label mancante, spostalo
                     if target_label in scaffold_labels:
-                        # Rimuovi scaffold dal train
                         train_scaffolds.remove(scaffold)
                         for idx in info['indices']:
                             train_idxs.remove(idx)
                         
-                        # Aggiungi al test
                         test_scaffolds.append(scaffold)
                         test_idxs.extend(info['indices'])
                         
                         test_labels = get_label_distribution(test_idxs)
                         moved = True
-                        print(f"   🔄 Spostato scaffold (size={info['size']}) al test per classe {target_label}")
                         break
             
-            # Poi fixare val set
             if not moved and len(val_labels) < 2:
                 missing_in_val = set(all_labels) - val_labels
                 target_label = list(missing_in_val)[0]
@@ -202,13 +180,11 @@ def scaffold_split(df, smiles_col='smiles', sizes=(0.8, 0.1, 0.1), seed=42):
                         
                         val_labels = get_label_distribution(val_idxs)
                         moved = True
-                        print(f"   🔄 Spostato scaffold (size={info['size']}) al val per classe {target_label}")
                         break
             
             if not moved:
                 break
         
-        # Verifica finale
         train_labels = get_label_distribution(train_idxs)
         val_labels = get_label_distribution(val_idxs)
         test_labels = get_label_distribution(test_idxs)
@@ -217,24 +193,12 @@ def scaffold_split(df, smiles_col='smiles', sizes=(0.8, 0.1, 0.1), seed=42):
             print(f"   ⚠️ WARNING: Impossibile bilanciare dopo {iteration} iterazioni")
             print(f"      Train: {train_labels}, Val: {val_labels}, Test: {test_labels}")
     
-    print(f"Scaffold Split Result: Train {len(train_idxs)}, Val {len(val_idxs)}, Test {len(test_idxs)}")
-    
-    # Log distribuzione
-    if n_classes >= 2:
-        train_dist = df.loc[train_idxs, 'label'].value_counts().to_dict()
-        val_dist = df.loc[val_idxs, 'label'].value_counts().to_dict()
-        test_dist = df.loc[test_idxs, 'label'].value_counts().to_dict()
-        print(f"   Train: {train_dist}")
-        print(f"   Val: {val_dist}")
-        print(f"   Test: {test_dist}")
     
     return df.loc[train_idxs], df.loc[val_idxs], df.loc[test_idxs]
 # ---------------------------------------------
 
 
 class TransformerClassifier(nn.Module):
-    """ChemBERTa encoder with a single fully connected classification head."""
-
     def __init__(self, checkpoint: str, num_labels: int = 2, dropout: float = 0.1):
         super().__init__()
         self.encoder = AutoModel.from_pretrained(checkpoint, add_pooling_layer=False)
@@ -260,79 +224,55 @@ class TransformerClassifier(nn.Module):
         return SequenceClassifierOutput(loss=loss, logits=logits)
 
 def compute_metrics(eval_pred, is_regression=False, train_labels_mean=None):
-    """
-    Calcola le metriche di VALUTAZIONE secondo la slide 10:
-    - Classificazione: ROC-AUC
-    - Regressione: RSE (Relative Squared Error)
-    
-    Nota: La loss function (slide 8) è diversa:
-    - Classificazione usa BCE durante il training
-    - Regressione usa MSE durante il training
-    """
     logits, labels = eval_pred
     
     if is_regression:
-        # Regressione: calcola RSE come METRICA DI VALUTAZIONE (slide 10)
         preds = np.squeeze(logits)
         
-        # RSE = sum((y_test - y_pred)^2) / sum((y_test - mean(y_train))^2)
         numerator = np.sum((labels - preds) ** 2)
         
         if train_labels_mean is not None:
             denominator = np.sum((labels - train_labels_mean) ** 2)
         else:
-            # Fallback: usa la media dei labels di test (meno accurato)
             denominator = np.sum((labels - np.mean(labels)) ** 2)
         
         rse = float(numerator / denominator) if denominator > 0 else 0.0
         
-        # Calcola anche RMSE per riferimento (la loss usa MSE durante training)
         mse = np.mean((preds - labels) ** 2)
         rmse = float(np.sqrt(mse))
         mae = float(np.mean(np.abs(preds - labels)))
         
         return {
             "rse": rse,
-            "eval_rse": rse,  # Per compatibilità con early stopping
-            "rmse": rmse,     # Radice quadrata della loss MSE
+            "eval_rse": rse,
+            "rmse": rmse,
             "mae": mae
         }
     else:
-        # Classificazione: calcola ROC-AUC come da slide 10
-        # Predizioni discrete
         predictions = np.argmax(logits, axis=-1)
 
-        # Calcolo probabilità classe positiva in modo numericamente stabile
         try:
-            # logits potrebbe essere numpy array
             logits_np = np.array(logits)
-            # Softmax numericamente stabile
             exp_logits = np.exp(logits_np - np.max(logits_np, axis=1, keepdims=True))
             probs = exp_logits / np.sum(exp_logits, axis=1, keepdims=True)
-            # prendiamo la probabilità della classe positiva (indice 1 se presente)
             if probs.shape[1] > 1:
                 pos_probs = probs[:, 1]
             else:
-                # se il modello ha una sola uscita, assumiamo regressione-binarizzata
                 pos_probs = probs[:, 0]
         except Exception:
-            # Fallback: usa torch softmax se possibile
             try:
                 pos_probs = torch.nn.functional.softmax(torch.tensor(logits), dim=-1)[:, 1].numpy()
             except Exception:
                 pos_probs = np.zeros(len(predictions))
 
-        # Assicuriamoci che le labels siano array 1D di interi
         labels_np = np.array(labels).reshape(-1)
         try:
             labels_int = labels_np.astype(int)
         except Exception:
             labels_int = labels_np
 
-        # Se nel batch/test set è presente una sola classe, roc_auc_score non è definita
         unique_classes = np.unique(labels_int)
         if len(unique_classes) < 2:
-            # Meglio ritornare NaN e loggare la situazione piuttosto che 0.0 (che è fuorviante)
             roc_auc = float('nan')
         else:
             roc_auc = float(roc_auc_score(labels_int, pos_probs))
@@ -392,30 +332,22 @@ def train_model(model, train_loader, eval_loader, device, optimizer, tracker, em
 
         if emissions_callback:
             if emissions_callback.check_early_stopping(metrics, current_emissions):
-                # epochs_completed = epoch+1
                 return metrics, (epoch + 1)
-    # completed all epochs
     return metrics, epochs
 
 
 def main(dataset, alpha, warmup_epochs, model_name, progress_mode='epoch', show_batch_logs=False, quiet=False):
-    print(f"--- Fine-tuning {model_name} sul dataset {dataset} ---")
     df = load_dataset("transformers", dataset)
-    # Rendiamo l'esperimento riproducibile
     seed = 42
     random.seed(seed)
     np.random.seed(seed)
     torch.manual_seed(seed)
     
-    # Determina se regressione
     is_regression = dataset in REGRESSION_DATASETS
     
-    # Scaffold Splitting con eliminazione molecole invalide
-    print(f"Eseguendo Scaffold Splitting (80/10/10) su {len(df)} molecole...")
     df = df.reset_index(drop=True)
     train_df, eval_df, test_df = scaffold_split(df, smiles_col="smiles", sizes=(0.8, 0.1, 0.1))
 
-    # Calcola la media delle label di training per RSE (necessario per regressione)
     train_labels_mean = train_df["label"].mean() if is_regression else None
 
     train_dataset = Dataset.from_pandas(train_df, preserve_index=False)
@@ -462,7 +394,6 @@ def main(dataset, alpha, warmup_epochs, model_name, progress_mode='epoch', show_
         # Passa is_regression al callback
         emissions_callback = EmissionsEarlyStoppingCallback(tracker, alpha=alpha, warmup_epochs=warmup_epochs, is_regression=is_regression) if use_early else None
 
-        print(f"Inizio training {'con' if use_early else 'senza'} early stopping...")
         use_tqdm = (progress_mode == 'bar')
         eval_results, epochs_completed = train_model(model, train_loader, eval_loader, device, optimizer, tracker, 
                       emissions_callback, HYPERPARAMS["epochs"], 
@@ -470,8 +401,6 @@ def main(dataset, alpha, warmup_epochs, model_name, progress_mode='epoch', show_
                       use_tqdm=use_tqdm, show_batch_logs=show_batch_logs, quiet=quiet)
 
         emissions = tracker.stop()
-        print(f"Emissioni stimate: {emissions:.6f} kg CO2eq")
-        print(f"Risultati Finali (val): {eval_results} -- Epoche eseguite: {epochs_completed}")
 
         # Valutazione finale su test set
         model.eval()
@@ -491,7 +420,6 @@ def main(dataset, alpha, warmup_epochs, model_name, progress_mode='epoch', show_
                            train_labels_mean=train_labels_mean)
         print(f"Metriche finali su test set: {final_metrics}")
 
-        # Salva risultati su CSV
         if is_regression:
             auroc = float('nan')
             rse = final_metrics.get("rse", float('nan'))
@@ -500,12 +428,7 @@ def main(dataset, alpha, warmup_epochs, model_name, progress_mode='epoch', show_
             auroc = final_metrics.get("roc_auc", final_metrics.get("eval_roc_auc", float('nan')))
             rse = float('nan')
             rmse = float('nan')
-        # Avvisa se AUROC non è definita (es. solo una classe nel test set)
-        try:
-            if not is_regression and (auroc is None or (isinstance(auroc, float) and np.isnan(auroc))):
-                print("Warning: AUROC non definita sul test set (probabilmente presente una sola classe). Verificare lo split dei dati.")
-        except Exception:
-            pass
+        
         emissions_value = emissions
         results_df = pd.DataFrame([{
             "experiment": project_name,
@@ -516,7 +439,6 @@ def main(dataset, alpha, warmup_epochs, model_name, progress_mode='epoch', show_
             "epochs_completed": int(epochs_completed)
         }])
         
-        print(f"Saving experiment: {project_name}, emissions={emissions_value:.6f}, auroc={auroc}, rse={rse}, rmse={rmse}")
         results_df.to_csv(f"experiments_{dataset}.csv", mode='a', header=not os.path.exists(f"experiments_{dataset}.csv"), index=False)
 
 

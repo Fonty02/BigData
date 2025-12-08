@@ -6,34 +6,17 @@ REGRESSION_DATASETS = {"cep", "malaria", "lipophilicity", "delaney"}
 
 
 def _find_label_column(raw_df: pd.DataFrame, dataset_name: str) -> str:
-    """
-    Prova a determinare la colonna target nel raw dataframe.
-    FIX: Aggiunto dataset_name per gestire casi speciali.
-    """
-    # Casi speciali per dataset noti
-    if dataset_name.lower() == "bbbp":
-        return "p_np"  # BBBP usa 'p_np' come label
-    elif dataset_name.lower() == "hiv":
-        return "HIV_active"  # HIV usa 'HIV_active'
-    elif dataset_name.lower() == "bace":
-        return "Class"
-    elif dataset_name.lower() == "clintox":
-        return "CT_TOX"  # o "FDA_APPROVED", dipende dal task
-    
-    # Strategia generale
     candidates = [c for c in ["Class", "class", "label", "activity", "PCE", "exp", "value", "p_np", "HIV_active"] 
                   if c in raw_df.columns]
     if candidates:
         return candidates[0]
 
-    # Preferisci colonne numeriche non 'smiles'
     numeric_cols = [c for c in raw_df.columns 
                    if pd.api.types.is_numeric_dtype(raw_df[c]) 
                    and c.lower() not in ("smiles", "mol", "cmpd_chemblid", "mol_id")]
     if numeric_cols:
         return numeric_cols[0]
 
-    # Fallback: se il file ha una sola colonna numerica oltre allo smiles
     possible = [c for c in raw_df.columns 
                if c.lower() not in ("smiles", "mol", "cmpd_chemblid", "mol_id")]
     if possible:
@@ -72,7 +55,6 @@ def load_for_transformers(name: str):
     else:
         # Individua la colonna target nel raw
         label_col = _find_label_column(raw_df, name)
-        print(f"📌 Dataset '{name}': usando colonna '{label_col}' come label")
         
         # FIX: Gestisci valori non numerici (es. 'CI' in HIV)
         raw_target_df = raw_df[["smiles", label_col]].copy()
@@ -81,11 +63,7 @@ def load_for_transformers(name: str):
         raw_target_df[label_col] = pd.to_numeric(raw_target_df[label_col], errors='coerce')
         
         # Rimuovi righe con label NaN
-        before_drop = len(raw_target_df)
         raw_target_df = raw_target_df.dropna(subset=[label_col])
-        after_drop = len(raw_target_df)
-        if before_drop != after_drop:
-            print(f"⚠️  Rimosse {before_drop - after_drop} molecole con label non valide")
         
         raw_target_df = raw_target_df.rename(columns={label_col: "label"})
         merged = proc_df.merge(raw_target_df, on="smiles", how="inner")
@@ -98,11 +76,9 @@ def load_for_transformers(name: str):
     # FIX CRITICO: Converti label da {-1, 1} a {0, 1} per classificazione
     if name.lower() not in REGRESSION_DATASETS:
         unique_labels = merged["label"].unique()
-        print(f"   Label uniche trovate: {sorted(unique_labels)}")
         
         # Se le label sono {-1, 1}, convertile a {0, 1}
         if set(unique_labels) == {-1, 1} or set(unique_labels) == {-1.0, 1.0}:
-            print(f"   🔄 Conversione label da {{-1, 1}} a {{0, 1}}")
             merged["label"] = (merged["label"] + 1) / 2
             merged["label"] = merged["label"].astype(int)
         else:
@@ -112,7 +88,6 @@ def load_for_transformers(name: str):
         # Regressione: converti a float
         merged["label"] = merged["label"].astype(float)
     
-    print(f"✅ Dataset '{name}' caricato: {len(merged)} molecole")
     return merged
 
 
@@ -149,20 +124,10 @@ def load_for_GNN(name: str):
                     mask_neg = (self.data.y == -1)
                     
                     if mask_neg.any():
-                        count = mask_neg.sum().item()
-                        print(f"⚠️  FIX ATTIVO: Trovate {count} label a '-1' nel dataset '{name}'.")
-                        print(f"   🔄 Conversione forzata in memoria: -1 -> 0")
-                        
-                        # Sostituisci direttamente -1 con 0
                         self.data.y[mask_neg] = 0
-                        
-                        # Debug verifica
-                        unique_labels = torch.unique(self.data.y[~torch.isnan(self.data.y)])
-                        print(f"   ✅ Label uniche attuali: {unique_labels.tolist()}")
 
     # Istanzia il dataset (applica il fix nel costruttore)
     dataset = TempDataset(processed_path)
-    print(f"✅ Dataset GNN '{name}' caricato: {len(dataset)} grafi")
     return dataset
 
 
@@ -183,31 +148,17 @@ def load_dataset(type: str, name: str):
 
 
 if __name__ == "__main__":
-    # Test
     import sys
     if len(sys.argv) > 1:
         dataset_name = sys.argv[1]
-        print(f"\n{'='*80}")
-        print(f"Test caricamento dataset: {dataset_name}")
-        print(f"{'='*80}\n")
         
         try:
             df = load_for_transformers(dataset_name)
-            print(f"\n📊 Statistiche Transformers:")
-            print(f"   Shape: {df.shape}")
-            print(f"   Colonne: {list(df.columns)}")
-            print(f"   Label unique: {sorted(df['label'].unique())}")
-            print(f"   Label distribution:\n{df['label'].value_counts()}")
         except Exception as e:
             print(f"❌ Errore Transformers: {e}")
         
         try:
             data_list = load_for_GNN(dataset_name)
-            print(f"\n📊 Statistiche GNN:")
-            print(f"   Numero grafi: {len(data_list)}")
-            if len(data_list) > 0:
-                print(f"   Features per nodo: {data_list[0].x.shape[1]}")
-                print(f"   Label shape: {data_list[0].y.shape}")
         except Exception as e:
             print(f"❌ Errore GNN: {e}")
     else:
