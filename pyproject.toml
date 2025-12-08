@@ -6,6 +6,7 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "accelerate>=1.12.0",
+    "chem>=2.0.0",
     "codecarbon>=3.0.8",
     "datasets>=4.4.1",
     "matplotlib>=3.10.7",
@@ -13,6 +14,10 @@ dependencies = [
     "pandas>=2.3.3",
     "rdkit>=2025.9.3",
     "scikit-learn>=1.7.2",
+    "torch-geometric>=2.7.0",
+    "torch-scatter",
     "tqdm>=4.67.1",
     "transformers>=4.57.3",
 ]
+ [tool.uv.extra-build-dependencies]
+      torch-scatter = ["torch"]

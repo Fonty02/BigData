@@ -462,7 +462,7 @@ if __name__ == "__main__":
                        default="third_party/GraphMAE/chem/init_weights/pretrained.pth",
                        help="Path ai pesi pre-addestrati")
     parser.add_argument("--alpha", type=float, default=0.9, help="EMA alpha per early stopping")
-    parser.add_argument("--warmup_epochs", type=int, default=10, help="Warmup epoche")
+    parser.add_argument("--warmup_epochs", type=int, default=30, help="Warmup epoche")
     
     args = parser.parse_args()
     
