@@ -75,83 +75,158 @@ HYPERPARAMS = {
     "epochs": 10
 }
 
-# --- FUNZIONE PER SCAFFOLD SPLITTING ---
+# --- FUNZIONE PER SCAFFOLD SPLITTING PER TRANSFORMERS ---
 def scaffold_split(df, smiles_col='smiles', sizes=(0.8, 0.1, 0.1), seed=42):
     """
-    Divide il dataset basandosi sugli scaffold di Murcko (struttura chimica).
-    Le molecole con lo stesso scaffold finiscono nello stesso set.
-    Molecole con SMILES invalidi vengono eliminate (come da slide 9).
+    Divide il dataset basandosi sugli scaffold di Murcko con stratificazione.
+    FIX: Sposta SCAFFOLD INTERI per mantenere l'integrità dello scaffold splitting.
     """
-    # 1. Filtra molecole invalide prima di processare
+    import random
+    random.seed(seed)
+    np.random.seed(seed)
+    
+    # 1. Raggruppa molecole per scaffold
     valid_indices = []
     scaffolds = defaultdict(list)
     
     for idx, row in df.iterrows():
         mol = Chem.MolFromSmiles(row[smiles_col])
         if mol is not None:
-            # Calcola lo scaffold di Murcko
             scaffold = MurckoScaffold.MurckoScaffoldSmiles(mol=mol, includeChirality=False)
             scaffolds[scaffold].append(idx)
             valid_indices.append(idx)
         else:
-            # Elimina molecole non valide (come da slide 9: "Eliminazione di molecole con feature non valide")
             print(f"Warning: Eliminata molecola con SMILES invalido all'indice {idx}")
 
-    # Usa solo le molecole valide
     df_valid = df.loc[valid_indices]
     print(f"Molecole valide: {len(df_valid)}/{len(df)} ({len(df)-len(df_valid)} eliminate)")
 
-    # 2. Ordina gli scaffold dal più grande al più piccolo
-    scaffold_sets = list(scaffolds.values())
-    scaffold_sets.sort(key=len, reverse=True)
-
+    # 2. Crea metadata per ogni scaffold
+    scaffold_metadata = {}
+    for scaffold, indices in scaffolds.items():
+        labels = df.loc[indices, 'label'].values
+        scaffold_metadata[scaffold] = {
+            'indices': indices,
+            'size': len(indices),
+            'labels': labels,
+            'label_counts': {int(l): int(np.sum(labels == l)) for l in np.unique(labels)}
+        }
+    
+    # 3. Ordina scaffold per dimensione (decrescente)
+    scaffold_sets = sorted(scaffold_metadata.items(), key=lambda x: x[1]['size'], reverse=True)
+    
+    # 4. Distribuzione iniziale
     train_idxs, val_idxs, test_idxs = [], [], []
-    train_cutoff = sizes[0] * len(df_valid)
-    val_cutoff = (sizes[0] + sizes[1]) * len(df_valid)
+    train_scaffolds, val_scaffolds, test_scaffolds = [], [], []
+    
+    train_cutoff = sizes[0] * len(valid_indices)
+    val_cutoff = (sizes[0] + sizes[1]) * len(valid_indices)
 
-    # 3. Distribuisci i gruppi nei set
-    for group in scaffold_sets:
-        if len(train_idxs) + len(group) <= train_cutoff:
-            train_idxs.extend(group)
-        elif len(train_idxs) + len(val_idxs) + len(group) <= val_cutoff:
-            val_idxs.extend(group)
+    for scaffold, info in scaffold_sets:
+        indices = info['indices']
+        if len(train_idxs) + len(indices) <= train_cutoff:
+            train_idxs.extend(indices)
+            train_scaffolds.append(scaffold)
+        elif len(train_idxs) + len(val_idxs) + len(indices) <= val_cutoff:
+            val_idxs.extend(indices)
+            val_scaffolds.append(scaffold)
         else:
-            test_idxs.extend(group)
-    # Garantire che ciascuna partizione contenga almeno due classi (se il dataset ne contiene almeno 2)
+            test_idxs.extend(indices)
+            test_scaffolds.append(scaffold)
+    
+    # 5. Verifica e bilancia se necessario
+    def get_label_distribution(indices):
+        if not indices:
+            return set()
+        labels = df.loc[indices, 'label'].values
+        return set(np.unique(labels))
+    
     all_labels = df.loc[valid_indices, 'label'].unique()
-    n_classes_overall = len(np.unique(all_labels))
-
-    def ensure_min_two_classes(receiver_idxs, receiver_name):
-        receiver_labels = np.unique(df.loc[receiver_idxs, 'label'].values) if len(receiver_idxs) > 0 else np.array([])
-        if n_classes_overall >= 2 and len(receiver_labels) < 2:
-            missing = [c for c in np.unique(all_labels) if c not in receiver_labels]
-            # Cerchiamo esempi da spostare preferibilmente dal train
-            for m in missing:
-                donor_found = False
-                # Priorità: train -> test -> val (non spostare dall'holder stesso)
-                for donor_list in (train_idxs, test_idxs, val_idxs):
-                    if donor_list is receiver_idxs:
-                        continue
-                    # cerca un indice nel donor_list che abbia label == m
-                    for j, idx in enumerate(list(donor_list)):
-                        try:
-                            if df.at[idx, 'label'] == m:
-                                # sposta questo indice nel receiver
-                                donor_list.pop(j)
-                                receiver_idxs.append(idx)
-                                print(f"Bilanciamento split: spostato indice {idx} (label={m}) in {receiver_name} da donor")
-                                donor_found = True
-                                break
-                        except Exception:
-                            continue
-                    if donor_found:
+    n_classes = len(all_labels)
+    
+    if n_classes >= 2:
+        train_labels = get_label_distribution(train_idxs)
+        val_labels = get_label_distribution(val_idxs)
+        test_labels = get_label_distribution(test_idxs)
+        
+        # FIX: Sposta SCAFFOLD INTERI, non singoli indici
+        max_iterations = 50
+        iteration = 0
+        
+        while (len(test_labels) < 2 or len(val_labels) < 2) and iteration < max_iterations:
+            iteration += 1
+            moved = False
+            
+            # Priorità: fixare il test set
+            if len(test_labels) < 2:
+                missing_in_test = set(all_labels) - test_labels
+                target_label = list(missing_in_test)[0]
+                
+                # Cerca scaffold nel train che contiene la classe mancante
+                for scaffold in train_scaffolds:
+                    info = scaffold_metadata[scaffold]
+                    scaffold_labels = set(np.unique(info['labels']))
+                    
+                    # Se questo scaffold contiene la label mancante, spostalo
+                    if target_label in scaffold_labels:
+                        # Rimuovi scaffold dal train
+                        train_scaffolds.remove(scaffold)
+                        for idx in info['indices']:
+                            train_idxs.remove(idx)
+                        
+                        # Aggiungi al test
+                        test_scaffolds.append(scaffold)
+                        test_idxs.extend(info['indices'])
+                        
+                        test_labels = get_label_distribution(test_idxs)
+                        moved = True
+                        print(f"   🔄 Spostato scaffold (size={info['size']}) al test per classe {target_label}")
                         break
-
-    # Applichiamo il bilanciamento per val e test, preferendo prendere esempi dal train
-    ensure_min_two_classes(val_idxs, 'Val')
-    ensure_min_two_classes(test_idxs, 'Test')
-
+            
+            # Poi fixare val set
+            if not moved and len(val_labels) < 2:
+                missing_in_val = set(all_labels) - val_labels
+                target_label = list(missing_in_val)[0]
+                
+                for scaffold in train_scaffolds:
+                    info = scaffold_metadata[scaffold]
+                    scaffold_labels = set(np.unique(info['labels']))
+                    
+                    if target_label in scaffold_labels:
+                        train_scaffolds.remove(scaffold)
+                        for idx in info['indices']:
+                            train_idxs.remove(idx)
+                        
+                        val_scaffolds.append(scaffold)
+                        val_idxs.extend(info['indices'])
+                        
+                        val_labels = get_label_distribution(val_idxs)
+                        moved = True
+                        print(f"   🔄 Spostato scaffold (size={info['size']}) al val per classe {target_label}")
+                        break
+            
+            if not moved:
+                break
+        
+        # Verifica finale
+        train_labels = get_label_distribution(train_idxs)
+        val_labels = get_label_distribution(val_idxs)
+        test_labels = get_label_distribution(test_idxs)
+        
+        if len(test_labels) < 2 or len(val_labels) < 2:
+            print(f"   ⚠️ WARNING: Impossibile bilanciare dopo {iteration} iterazioni")
+            print(f"      Train: {train_labels}, Val: {val_labels}, Test: {test_labels}")
+    
     print(f"Scaffold Split Result: Train {len(train_idxs)}, Val {len(val_idxs)}, Test {len(test_idxs)}")
+    
+    # Log distribuzione
+    if n_classes >= 2:
+        train_dist = df.loc[train_idxs, 'label'].value_counts().to_dict()
+        val_dist = df.loc[val_idxs, 'label'].value_counts().to_dict()
+        test_dist = df.loc[test_idxs, 'label'].value_counts().to_dict()
+        print(f"   Train: {train_dist}")
+        print(f"   Val: {val_dist}")
+        print(f"   Test: {test_dist}")
     
     return df.loc[train_idxs], df.loc[val_idxs], df.loc[test_idxs]
 # ---------------------------------------------
@@ -381,7 +456,7 @@ def main(dataset, alpha, warmup_epochs, model_name, progress_mode='epoch', show_
         test_loader = DataLoader(tokenized_test, batch_size=HYPERPARAMS["batch_size"], num_workers=2, pin_memory=True, persistent_workers=True)
 
         project_name = f"{model_name}_early" if use_early else f"{model_name}_classic"
-        tracker = EmissionsTracker(project_name=project_name, output_dir=f"./emissions_{dataset}", tracking_mode="process")
+        tracker = EmissionsTracker(project_name=project_name, output_dir=f"./emissions_{dataset}", tracking_mode="process", log_level="critical")
         tracker.start()
 
         # Passa is_regression al callback
@@ -474,7 +549,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--progress",
         choices=["bar", "epoch", "none"],
-        default="epoch",
+        default="bar",
         help="Tipo di avanzamento: 'bar' per tqdm, 'epoch' per stampare solo epoche, 'none' per niente",
     )
     parser.add_argument(

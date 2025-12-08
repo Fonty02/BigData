@@ -25,7 +25,22 @@ $cmds = @(
     @($python, '-m', 'Transformers', '--dataset', 'bace', '--model', 'chemberta'),
     @($python, '-m', 'Transformers', '--dataset', 'bace', '--model', 'chemberta2'),
     @($python, '-m', 'Transformers', '--dataset', 'bace', '--model', 'selformer'),
-    @($python, '-m', 'Transformers', '--dataset', 'bace', '--model', 'smilesbert')
+    @($python, '-m', 'Transformers', '--dataset', 'bace', '--model', 'smilesbert'),
+
+    @($python, '-m', 'Transformers', '--dataset', 'cep', '--model', 'chemberta'),
+    @($python, '-m', 'Transformers', '--dataset', 'cep', '--model', 'chemberta2'),
+    @($python, '-m', 'Transformers', '--dataset', 'cep', '--model', 'selformer'),
+    @($python, '-m', 'Transformers', '--dataset', 'cep', '--model', 'smilesbert'),
+
+    @($python, '-m', 'Transformers', '--dataset', 'malaria', '--model', 'chemberta'),
+    @($python, '-m', 'Transformers', '--dataset', 'malaria', '--model', 'chemberta2'),
+    @($python, '-m', 'Transformers', '--dataset', 'malaria', '--model', 'selformer'),
+    @($python, '-m', 'Transformers', '--dataset', 'malaria', '--model', 'smilesbert'),
+
+    @($python, '-m', 'Transformers', '--dataset', 'lipophilicity', '--model', 'chemberta'),
+    @($python, '-m', 'Transformers', '--dataset', 'lipophilicity', '--model', 'chemberta2'),
+    @($python, '-m', 'Transformers', '--dataset', 'lipophilicity', '--model', 'selformer'),
+    @($python, '-m', 'Transformers', '--dataset', 'lipophilicity', '--model', 'smilesbert')
 )
 
 foreach ($cmd in $cmds) {
