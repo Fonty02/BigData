@@ -35,28 +35,33 @@ $datasets = @(
     "malaria"
 )
 
+# Lista dei valori di warmup epochs
+$warmup_values = @(10, 25, 50)
+
 # Parametri comuni
 $epochs = 100
 $batch_size = 32
 
 foreach ($dataset in $datasets) {
-    Write-Host "================================================================"
-    Write-Host " AVVIO FINE-TUNING GRAPHMAE SU DATASET: $dataset "
-    Write-Host "================================================================"
-    
-    $cmdArgs = @($script, '--dataset', $dataset, '--epochs', $epochs, '--batch_size', $batch_size)
-    
-    Write-Host "Eseguo: $python $cmdArgs"
-    
-    & $python @cmdArgs
-    
-    if ($LASTEXITCODE -ne 0) {
-        Write-Error "Errore durante l'esecuzione del dataset $dataset. Codice uscita: $LASTEXITCODE"
-        # Decommenta 'Break' se vuoi fermare l'esecuzione al primo errore
-        # Break 
+    foreach ($warmup in $warmup_values) {
+        Write-Host "================================================================"
+        Write-Host " AVVIO FINE-TUNING GRAPHMAE SU DATASET: $dataset (warmup: $warmup) "
+        Write-Host "================================================================"
+        
+        $cmdArgs = @($script, '--dataset', $dataset, '--epochs', $epochs, '--batch_size', $batch_size, '--warmup_epochs', $warmup)
+        
+        Write-Host "Eseguo: $python $cmdArgs"
+        
+        & $python @cmdArgs
+        
+        if ($LASTEXITCODE -ne 0) {
+            Write-Error "Errore durante l'esecuzione del dataset $dataset con warmup $warmup. Codice uscita: $LASTEXITCODE"
+            # Decommenta 'Break' se vuoi fermare l'esecuzione al primo errore
+            # Break 
+        }
+        
+        Write-Host "Completato $dataset con warmup $warmup.`n"
     }
-    
-    Write-Host "Completato $dataset.`n"
 }
 
 Pop-Location

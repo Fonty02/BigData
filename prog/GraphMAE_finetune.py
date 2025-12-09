@@ -343,7 +343,7 @@ def main(dataset, epochs, batch_size, lr, model_path, use_early_stopping, alpha=
     
     criterion = nn.MSELoss() if is_regression else nn.BCEWithLogitsLoss()
     
-    project_name = f"graphmae_early" if use_early_stopping else f"graphmae_classic"
+    project_name = f"graphmae_early_{warmup_epochs}" if use_early_stopping else f"graphmae_classic_{warmup_epochs}"
     tracker = EmissionsTracker(
         project_name=project_name,
         output_dir=f"./emissions_{dataset}",

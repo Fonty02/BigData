@@ -114,17 +114,17 @@ def load_for_GNN(name: str):
         def __init__(self, path):
             super().__init__(root=None)
             # Carica i dati dal disco (anche se hanno label sbagliate)
-            self.data, self.slices = torch.load(path, weights_only=False)
+            self._data, self.slices = torch.load(path, weights_only=False)
             
             # --- FIX CRITICO IN MEMORIA ---
-            if hasattr(self.data, 'y') and self.data.y is not None:
+            if hasattr(self._data, 'y') and self._data.y is not None:
                 # Se il dataset non è regressione, controlliamo le label
                 if name.lower() not in REGRESSION_DATASETS:
                     # Controlla se ci sono valori uguali a -1
-                    mask_neg = (self.data.y == -1)
+                    mask_neg = (self._data.y == -1)
                     
                     if mask_neg.any():
-                        self.data.y[mask_neg] = 0
+                        self._data.y[mask_neg] = 0
 
     # Istanzia il dataset (applica il fix nel costruttore)
     dataset = TempDataset(processed_path)

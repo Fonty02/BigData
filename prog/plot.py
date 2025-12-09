@@ -18,21 +18,42 @@ def plot_tradeoff(df, metric, out_name, title):
 
     # Preprocessing: separa base_model e variant (split dall'ultimo underscore)
     def split_name(x):
-        if isinstance(x, str) and '_' in x:
-            parts = x.rsplit('_', 1)
-            return parts[0], parts[1]
-        return x, ''
+        # Normalizza i nomi dei modelli. Per i modelli GraphMAE vogliamo
+        # che la base sia `graphmae` e la variant includa sia il tipo
+        # (classic/early) che la dimensione (10/25/50), es. 'classic_10'.
+        if not isinstance(x, str) or '_' not in x:
+            return x, ''
+        x_lower = x.lower()
+        if x_lower.startswith('graphmae'):
+            parts = x.split('_', 1)
+            if len(parts) == 2:
+                return parts[0], parts[1]
+            return parts[0], ''
+        # comportamento preesistente: split dall'ultimo underscore
+        parts = x.rsplit('_', 1)
+        return parts[0], parts[1]
 
     df[['base_model', 'variant']] = df['experiment'].apply(lambda x: pd.Series(split_name(x)))
+
+    # Creiamo un gruppo di plotting. Per GraphMAE vogliamo distinguere
+    # le curve in base al valore di `warmup` (es. graphmae_10, graphmae_25).
+    df['plot_group'] = df['base_model']
+    if 'warmup' in df.columns:
+        try:
+            df['warmup_str'] = df['warmup'].astype(int).astype(str)
+        except Exception:
+            df['warmup_str'] = df['warmup'].astype(str)
+        mask = df['base_model'].str.lower() == 'graphmae'
+        df.loc[mask, 'plot_group'] = df.loc[mask, 'base_model'] + '_' + df.loc[mask, 'warmup_str']
 
     plt.figure(figsize=(10, 8))
 
     colors = {'early': 'green', 'classic': 'red'}
 
-    unique_models = df['base_model'].unique()
+    unique_models = df['plot_group'].unique()
 
     for model in unique_models:
-        subset = df[df['base_model'] == model].copy()
+        subset = df[df['plot_group'] == model].copy()
         subset = subset.sort_values(by='emissions')
 
         # disegna linea se ci sono più punti
@@ -49,7 +70,11 @@ def plot_tradeoff(df, metric, out_name, title):
                 pass
 
         for _, row in subset.iterrows():
-            c = colors.get(str(row.get('variant', '')).lower(), 'blue')
+            variant = str(row.get('variant', '') or '').lower()
+            # se la variant contiene sottoparti come 'early_10', prendiamo
+            # la prima parte ('early') per decidere il colore
+            var_key = variant.split('_')[0] if variant else ''
+            c = colors.get(var_key, 'blue')
             plt.scatter(row['emissions'], row[metric], color=c, s=100, zorder=2)
 
     plt.xlabel("Emissioni (kg CO2eq)")
