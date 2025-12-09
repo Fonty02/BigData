@@ -70,132 +70,113 @@ REGRESSION_DATASETS = {"cep", "malaria", "lipophilicity"}
 HYPERPARAMS = {
     "lr": 1e-4,
     "batch_size": 32,
-    "epochs": 10
+    "epochs": 30
 }
 
-# --- FUNZIONE PER SCAFFOLD SPLITTING PER TRANSFORMERS ---
+
 def scaffold_split(df, smiles_col='smiles', sizes=(0.8, 0.1, 0.1), seed=42):
-    import random
+    # Setup random seeds
     random.seed(seed)
     np.random.seed(seed)
+    rng = np.random.RandomState(seed)
     
     valid_indices = []
     scaffolds = defaultdict(list)
     
-    for idx, row in df.iterrows():
-        mol = Chem.MolFromSmiles(row[smiles_col])
+    # 1. Generazione Scaffold (Ottimizzato con itertuples)
+    # Rileviamo automaticamente se usare 'label' o 'labels' (il tuo codice usa 'label' prima della rinomina)
+    label_col = 'label' if 'label' in df.columns else 'labels'
+    
+    for row in df.itertuples():
+        # getattr è sicuro e veloce
+        smiles = getattr(row, smiles_col)
+        mol = Chem.MolFromSmiles(smiles)
+        
         if mol is not None:
             scaffold = MurckoScaffold.MurckoScaffoldSmiles(mol=mol, includeChirality=False)
-            scaffolds[scaffold].append(idx)
-            valid_indices.append(idx)
+            scaffolds[scaffold].append(row.Index)
+            valid_indices.append(row.Index)
         else:
-            print(f"Warning: Eliminata molecola con SMILES invalido all'indice {idx}")
+            # Opzionale: print(f"Warning: Eliminata molecola indice {row.Index}")
+            pass
 
-    scaffold_metadata = {}
-    for scaffold, indices in scaffolds.items():
-        labels = df.loc[indices, 'label'].values
-        scaffold_metadata[scaffold] = {
-            'indices': indices,
-            'size': len(indices),
-            'labels': labels,
-            'label_counts': {int(label): int(np.sum(labels == label)) for label in np.unique(labels)}
-        }
+    # 2. Creazione Metadati
+    scaffold_metadata = []
+    # Pre-calcoliamo tutte le label valide per sapere quali classi esistono globalmente
+    all_valid_labels = set(df.loc[valid_indices, label_col].unique())
     
-    scaffold_sets = sorted(scaffold_metadata.items(), key=lambda x: x[1]['size'], reverse=True)
+    for scaffold, indices in scaffolds.items():
+        labels = df.loc[indices, label_col].values
+        unique_labels = set(labels)
+        
+        scaffold_metadata.append({
+            'scaffold': scaffold,
+            'indices': indices,
+            'len': len(indices),
+            'unique_labels': unique_labels # Salviamo il set per lookup rapido O(1)
+        })
+    
+    # Ordina: prima mescola (per rompere parità), poi ordina per dimensione
+    rng.shuffle(scaffold_metadata)
+    scaffold_metadata.sort(key=lambda x: x['len'], reverse=True)
     
     train_idxs, val_idxs, test_idxs = [], [], []
-    train_scaffolds, val_scaffolds, test_scaffolds = [], [], []
+    train_scaffolds_list = [] # Serve per tenere traccia di cosa è nel train per il bilanciamento
     
     train_cutoff = sizes[0] * len(valid_indices)
     val_cutoff = (sizes[0] + sizes[1]) * len(valid_indices)
 
-    for scaffold, info in scaffold_sets:
-        indices = info['indices']
-        if len(train_idxs) + len(indices) <= train_cutoff:
-            train_idxs.extend(indices)
-            train_scaffolds.append(scaffold)
-        elif len(train_idxs) + len(val_idxs) + len(indices) <= val_cutoff:
-            val_idxs.extend(indices)
-            val_scaffolds.append(scaffold)
+    # 3. Assegnazione iniziale (Greedy)
+    for info in scaffold_metadata:
+        if len(train_idxs) + info['len'] <= train_cutoff:
+            train_idxs.extend(info['indices'])
+            train_scaffolds_list.append(info)
+        elif len(train_idxs) + len(val_idxs) + info['len'] <= val_cutoff:
+            val_idxs.extend(info['indices'])
         else:
-            test_idxs.extend(indices)
-            test_scaffolds.append(scaffold)
+            test_idxs.extend(info['indices'])
     
-    def get_label_distribution(indices):
-        if not indices:
-            return set()
-        labels = df.loc[indices, 'label'].values
-        return set(np.unique(labels))
-    
-    all_labels = df.loc[valid_indices, 'label'].unique()
-    n_classes = len(all_labels)
-    
-    if n_classes >= 2:
-        train_labels = get_label_distribution(train_idxs)
-        val_labels = get_label_distribution(val_idxs)
-        test_labels = get_label_distribution(test_idxs)
+    # 4. Funzione di Ribilanciamento Robusta
+    # Questa funzione sposta scaffold dal Train al target (Val o Test) se mancano classi
+    def balance_dataset(target_idxs, dataset_name):
+        current_labels = set(df.loc[target_idxs, label_col].unique())
         
-        max_iterations = 50
-        iteration = 0
-        
-        while (len(test_labels) < 2 or len(val_labels) < 2) and iteration < max_iterations:
-            iteration += 1
-            moved = False
+        # Se il target ha meno di 2 classi, ma globalmente ce ne sono almeno 2
+        if len(current_labels) < 2 and len(all_valid_labels) >= 2:
+            # Trova la label mancante
+            missing_set = all_valid_labels - current_labels
+            if not missing_set: return
+            target_label = list(missing_set)[0]
             
-            if len(test_labels) < 2:
-                missing_in_test = set(all_labels) - test_labels
-                target_label = list(missing_in_test)[0]
+            # Cerca nel TRAIN uno scaffold che contenga la label mancante
+            candidates = [s for s in train_scaffolds_list if target_label in s['unique_labels']]
+            
+            # Ordina per lunghezza crescente (Smallest First) per minimizzare impatto sulle dimensioni
+            candidates.sort(key=lambda x: x['len'])
+            
+            if candidates:
+                swap_scaffold = candidates[0]
                 
-                for scaffold in train_scaffolds:
-                    info = scaffold_metadata[scaffold]
-                    scaffold_labels = set(np.unique(info['labels']))
-                    
-                    if target_label in scaffold_labels:
-                        train_scaffolds.remove(scaffold)
-                        for idx in info['indices']:
-                            train_idxs.remove(idx)
-                        
-                        test_scaffolds.append(scaffold)
-                        test_idxs.extend(info['indices'])
-                        
-                        test_labels = get_label_distribution(test_idxs)
-                        moved = True
-                        break
-            
-            if not moved and len(val_labels) < 2:
-                missing_in_val = set(all_labels) - val_labels
-                target_label = list(missing_in_val)[0]
+                # Rimuovi da Train (usiamo la rimozione logica veloce)
+                train_scaffolds_list.remove(swap_scaffold)
                 
-                for scaffold in train_scaffolds:
-                    info = scaffold_metadata[scaffold]
-                    scaffold_labels = set(np.unique(info['labels']))
-                    
-                    if target_label in scaffold_labels:
-                        train_scaffolds.remove(scaffold)
-                        for idx in info['indices']:
-                            train_idxs.remove(idx)
-                        
-                        val_scaffolds.append(scaffold)
-                        val_idxs.extend(info['indices'])
-                        
-                        val_labels = get_label_distribution(val_idxs)
-                        moved = True
-                        break
-            
-            if not moved:
-                break
-        
-        train_labels = get_label_distribution(train_idxs)
-        val_labels = get_label_distribution(val_idxs)
-        test_labels = get_label_distribution(test_idxs)
-        
-        if len(test_labels) < 2 or len(val_labels) < 2:
-            print(f"   ⚠️ WARNING: Impossibile bilanciare dopo {iteration} iterazioni")
-            print(f"      Train: {train_labels}, Val: {val_labels}, Test: {test_labels}")
+                # Rimuovi gli indici dal train (ricostruzione lista veloce)
+                idxs_to_remove = set(swap_scaffold['indices'])
+                train_idxs[:] = [i for i in train_idxs if i not in idxs_to_remove]
+                
+                # Aggiungi al target
+                target_idxs.extend(swap_scaffold['indices'])
+                print(f"   -> Bilanciato {dataset_name}: spostato scaffold ({swap_scaffold['len']} mol) con label {target_label}")
+            else:
+                print(f"   Warning: Impossibile bilanciare {dataset_name} (nessuno scaffold adatto nel train)")
+
+    # Bilancia sia Validation che Test (ordine importante)
+    if len(all_valid_labels) >= 2: # Solo se è un task di classificazione
+        balance_dataset(test_idxs, "TEST")
+        balance_dataset(val_idxs, "VAL")
     
-    
+    # 5. RESTITUZIONE DATAFRAME (Compatibilità con il tuo codice originale)
     return df.loc[train_idxs], df.loc[val_idxs], df.loc[test_idxs]
-# ---------------------------------------------
 
 
 class TransformerClassifier(nn.Module):
@@ -392,7 +373,7 @@ def main(dataset, alpha, warmup_epochs, model_name, progress_mode='epoch', show_
         tracker.start()
 
         # Passa is_regression al callback
-        emissions_callback = EmissionsEarlyStoppingCallback(tracker, alpha=alpha, warmup_epochs=warmup_epochs, is_regression=is_regression) if use_early else None
+        emissions_callback = EmissionsEarlyStoppingCallback(tracker, alpha=alpha, warmup_epochs=warmup_epochs, is_regression=is_regression, classic=not use_early)
 
         use_tqdm = (progress_mode == 'bar')
         eval_results, epochs_completed = train_model(model, train_loader, eval_loader, device, optimizer, tracker, 
@@ -436,7 +417,9 @@ def main(dataset, alpha, warmup_epochs, model_name, progress_mode='epoch', show_
             "auroc": auroc,
             "rse": rse,
             "rmse": rmse,
-            "epochs_completed": int(epochs_completed)
+            "Epoche fornite": HYPERPARAMS["epochs"],
+            "epoche usate": int(epochs_completed),
+            "warmup": warmup_epochs
         }])
         
         results_df.to_csv(f"experiments_{dataset}.csv", mode='a', header=not os.path.exists(f"experiments_{dataset}.csv"), index=False)
@@ -459,7 +442,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--warmup_epochs",
         type=int,
-        default=1,
+        default=5,
         help="Epoche di warm-up per l'early stopping.",
     )
     parser.add_argument(

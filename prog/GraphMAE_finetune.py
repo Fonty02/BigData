@@ -64,48 +64,59 @@ DATASET_NUM_TASKS = {
     "lipophilicity": 1, "delaney": 1
 }
 
-
-def scaffold_split_indices(df, smiles_col='smiles', sizes=(0.8, 0.1, 0.1), seed=42):
-    import numpy as np
-    from collections import defaultdict
+def scaffold_split_indices(df, smiles_col='smiles', label_col='label', sizes=(0.8, 0.1, 0.1), seed=42):
+    """
+    Ritorna GLI INDICI per train, val, test basandosi sugli scaffold.
+    Assicura che val e test abbiano rappresentanza di classi.
+    """
+    rng = np.random.RandomState(seed)
     
-    # 1. Raggruppa molecole per scaffold
+    # 1. Raggruppa molecole per scaffold (uso itertuples per velocità)
     valid_indices = []
     scaffolds = defaultdict(list)
     
-    for idx, row in df.iterrows():
-        mol = Chem.MolFromSmiles(row[smiles_col])
+    # Ottimizzazione: pre-calcolo indici e smiles
+    print("Generazione Scaffolds...")
+    for row in df.itertuples():
+        smiles = getattr(row, smiles_col)
+        mol = Chem.MolFromSmiles(smiles)
         if mol is not None:
             scaffold = MurckoScaffold.MurckoScaffoldSmiles(mol=mol, includeChirality=False)
-            scaffolds[scaffold].append(idx)
-            valid_indices.append(idx)
-    
-    print(f"Molecole valide per split: {len(valid_indices)}/{len(df)}")
+            scaffolds[scaffold].append(row.Index)
+            valid_indices.append(row.Index)
+            
+    print(f"Molecole valide: {len(valid_indices)}/{len(df)}")
 
-    # 2. Crea metadati per ogni scaffold (indici e label presenti)
+    # 2. Crea metadati
     scaffold_info = []
+    all_valid_labels = df.loc[valid_indices, label_col].unique()
+    
     for sc, idxs in scaffolds.items():
-        labels = df.loc[idxs, 'label'].values
-        unique_labels = np.unique(labels)
+        labels = df.loc[idxs, label_col].values
+        # Usiamo set per verifica rapida delle classi presenti nello scaffold
+        unique_lbls = set(labels)
+        
         scaffold_info.append({
             'scaffold': sc,
             'indices': idxs,
             'len': len(idxs),
-            'has_class_0': 0 in unique_labels or 0.0 in unique_labels,
-            'has_class_1': 1 in unique_labels or 1.0 in unique_labels
+            'unique_labels': unique_lbls # Salviamo il set delle label presenti
         })
 
-    # 3. Ordina scaffold per dimensione (dal più grande al più piccolo)
-    # Mescoliamo prima per rompere l'ordine deterministico degli scaffold di pari dimensione
-    rng = np.random.RandomState(seed)
+    # 3. Ordina (Shuffle + Sort)
     rng.shuffle(scaffold_info)
     scaffold_info.sort(key=lambda x: x['len'], reverse=True)
 
-    train_idxs, val_idxs, test_idxs = [], [], []
-    train_scaffolds_list = []
-    
+    # 4. Assegnazione Iniziale
     train_cutoff = sizes[0] * len(valid_indices)
     val_cutoff = (sizes[0] + sizes[1]) * len(valid_indices)
+    
+    train_idxs = []
+    val_idxs = []
+    test_idxs = []
+    
+    # Teniamo traccia degli scaffold nel train per poterli spostare dopo
+    train_scaffolds_list = [] 
 
     for info in scaffold_info:
         if len(train_idxs) + info['len'] <= train_cutoff:
@@ -115,26 +126,48 @@ def scaffold_split_indices(df, smiles_col='smiles', sizes=(0.8, 0.1, 0.1), seed=
             val_idxs.extend(info['indices'])
         else:
             test_idxs.extend(info['indices'])
-            
-    if not test_idxs:
-         return train_idxs, val_idxs, test_idxs
-         
-    test_labels = df.loc[test_idxs, 'label'].unique()
-    
-    if len(test_labels) < 2:
-        missing_label = 1 if (0 in test_labels or 0.0 in test_labels) else 0
+
+    # 5. Funzione di Bilanciamento (Applicabile sia a Val che a Test)
+    def balance_dataset(target_idxs, dataset_name):
+        # Convertiamo a set per velocità di calcolo
+        current_labels = set(df.loc[target_idxs, label_col].unique())
         
-        candidates = [s for s in train_scaffolds_list if (s['has_class_1'] if missing_label == 1 else s['has_class_0'])]
-        candidates.sort(key=lambda x: x['len'])
-        
-        if candidates:
-            swap_scaffold = candidates[0]
+        # Se abbiamo meno di 2 classi (e nel dataset originale ce ne sono almeno 2)
+        if len(current_labels) < 2 and len(all_valid_labels) >= 2:
+            # Trova quale label manca
+            missing = list(set(all_valid_labels) - current_labels)
+            target_label = missing[0] # Prendiamo la prima mancante
             
-            for idx in swap_scaffold['indices']:
-                if idx in train_idxs: train_idxs.remove(idx)
+            # Cerca candidati nel TRAIN che hanno la label mancante
+            # Ordiniamo per lunghezza crescente (smallest first) per minimizzare impatto
+            candidates = [s for s in train_scaffolds_list if target_label in s['unique_labels']]
+            candidates.sort(key=lambda x: x['len'])
             
-            test_idxs.extend(swap_scaffold['indices'])
-    
+            if candidates:
+                swap_scaffold = candidates[0]
+                
+                # Rimuovi da Train (logica ottimizzata)
+                # Usiamo set removal che è O(1) invece di list remove O(N)
+                train_scaffolds_list.remove(swap_scaffold)
+                
+                # Per rimuovere gli indici velocemente, ricostruiamo la lista o usiamo set
+                # Qui usiamo un trick veloce con i set
+                idxs_to_remove = set(swap_scaffold['indices'])
+                # Nota: modificare train_idxs qui richiede attenzione. 
+                # Poiché train_idxs è una lista di interi, la ricostruzione è sicura:
+                # Modifichiamo la lista train_idxs "in place" filtrandola
+                train_idxs[:] = [i for i in train_idxs if i not in idxs_to_remove]
+                
+                # Aggiungi al target (Val o Test)
+                target_idxs.extend(swap_scaffold['indices'])
+                print(f"   -> Bilanciato {dataset_name}: aggiunto scaffold con label {target_label} ({swap_scaffold['len']} mol)")
+            else:
+                print(f"   Warning: Impossibile trovare scaffold nel train per bilanciare {dataset_name}")
+
+    # Applica bilanciamento a entrambi
+    balance_dataset(test_idxs, "TEST")
+    balance_dataset(val_idxs, "VAL")
+
     return train_idxs, val_idxs, test_idxs
 
 
@@ -245,7 +278,7 @@ def eval(model, device, loader, is_regression, train_labels_mean=None, has_missi
     return compute_metrics(y_scores, y_true, is_regression, train_labels_mean, has_missing)
 
 
-def main(dataset, epochs, batch_size, lr, model_path, use_early_stopping, alpha=0.9, warmup_epochs=3):
+def main(dataset, epochs, batch_size, lr, model_path, use_early_stopping, alpha=0.9, warmup_epochs=10):
     seed = 42
     random.seed(seed)
     np.random.seed(seed)
@@ -319,12 +352,10 @@ def main(dataset, epochs, batch_size, lr, model_path, use_early_stopping, alpha=
     )
     tracker.start()
     
-    early_stopping_callback = None
-    if use_early_stopping:
-        early_stopping_callback = EmissionsEarlyStoppingCallback(
-            tracker, alpha=alpha, beta=0.2,
-            warmup_epochs=warmup_epochs, is_regression=is_regression
-        )
+    early_stopping_callback = EmissionsEarlyStoppingCallback(
+        tracker, alpha=alpha, beta=0.2,
+        warmup_epochs=warmup_epochs, is_regression=is_regression, classic=not use_early_stopping
+    )
     
     epochs_completed = epochs
     
@@ -365,7 +396,9 @@ def main(dataset, epochs, batch_size, lr, model_path, use_early_stopping, alpha=
         "auroc": auroc,
         "rse": rse,
         "rmse": rmse,
-        "epochs_completed": int(epochs_completed)
+        "Epoche fornite": epochs,
+        "epoche usate": int(epochs_completed),
+        "warmup": warmup_epochs
     }])
     
     csv_file = f"experiments_{dataset}.csv"
