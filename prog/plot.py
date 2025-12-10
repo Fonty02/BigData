@@ -85,8 +85,8 @@ def plot_tradeoff(df, metric, out_name, title):
     plt.grid(True, which='both', ls='--', alpha=0.5)
 
     legend_elements = [
-        Line2D([0], [0], marker='o', color='w', label='GES (Early)', markerfacecolor='green', markersize=10),
-        Line2D([0], [0], marker='o', color='w', label='No ES (Classic)', markerfacecolor='red', markersize=10)
+        Line2D([0], [0], marker='o', color='w', label='Emission Early Stopping', markerfacecolor='green', markersize=10),
+        Line2D([0], [0], marker='o', color='w', label='Classic Early Stopping', markerfacecolor='red', markersize=10)
     ]
     plt.legend(handles=legend_elements, loc='upper right')
     plt.tight_layout()

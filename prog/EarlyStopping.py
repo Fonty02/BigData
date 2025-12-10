@@ -64,13 +64,18 @@ class EmissionsEarlyStoppingCallback():
 
         if self.classic:
             # Classic early stopping based only on metrics
+            # NOTE: apply warmup_epochs to classic mode as well — do not trigger
+            # stopping (nor increase patience counter) before warmup completes.
             improved = (current_performance < self.best_performance) if self.is_regression else (current_performance > self.best_performance)
             if improved:
                 self.best_performance = current_performance
                 self.patience_counter = 0
             else:
-                self.patience_counter += 1
-            if self.patience_counter >= self.patience:
+                # Only count towards patience after warmup epochs
+                if self.epoch >= self.warmup_epochs:
+                    self.patience_counter += 1
+            # Only allow early stop after warmup
+            if self.epoch >= self.warmup_epochs and self.patience_counter >= self.patience:
                 return True
         else:
             # Original AER-based stopping
