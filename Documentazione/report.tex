@@ -38,9 +38,32 @@ Per ridurre l'impronta di carbonio, è stato implementato un callback personaliz
 
 Il training si arresta se $AER_t < \beta \cdot \text{EMA}(AER_{t-1})$, dove $\beta$ è una soglia di tolleranza e EMA è la media mobile esponenziale.
 
+\section{Configurazione Sperimentale}
+Tutti gli esperimenti sono stati condotti su una singola GPU NVIDIA RTX 4070 Mobile monitorando le emissioni tramite \texttt{CodeCarbon}.
+
+\subsection{Parametri di Training}
+\begin{itemize}
+    \item \textbf{Modelli basati su Transformers} (ChemBERTa, ChemBERTa-2, SELFormer, SMILES-BERT):
+    \begin{itemize}
+        \item \textbf{Epoche}: 30
+        \item \textbf{Batch Size}: 32
+        \item \textbf{Learning Rate}: $1 \times 10^{-4}$
+        \item \textbf{Optimizer}: Adam
+        \item \textbf{Warmup (Early Stopping)}: 5 epoche
+    \end{itemize}
+    \item \textbf{GraphMAE} (Graph Neural Network):
+    \begin{itemize}
+        \item \textbf{Epoche}: 100 (necessarie per la convergenza delle GNN)
+        \item \textbf{Batch Size}: 32
+        \item \textbf{Learning Rate}: $1 \times 10^{-4}$
+        \item \textbf{Optimizer}: Adam (Weight Decay = 0)
+        \item \textbf{Warmup (Early Stopping)}: Variabile (10, 25, 50 epoche) per analizzare la stabilità.
+    \end{itemize}
+\end{itemize}
+
 \section{Risultati Sperimentali}
 
-Di seguito vengono presentati i risultati per i quattro dataset analizzati. I modelli sono stati testati in configurazione "Classic" (fine-tuning completo) e "Early" (con arresto anticipato).
+Di seguito vengono presentati i risultati per i quattro dataset analizzati. I modelli sono stati testati in configurazione "Classic" (early stopping classico con patience=5) e "Green-Early" (con arresto anticipato basato su emissioni).
 
 \subsection{Dataset BACE (Classificazione)}
 Metriche utilizzate: ROC-AUC (maggiore è meglio).
@@ -48,18 +71,21 @@ Metriche utilizzate: ROC-AUC (maggiore è meglio).
 
 \begin{table}[H]
     \centering
-    \small
+    \tiny
     \begin{tabular}{lcccccc}
         \toprule
         \textbf{Modello} & \textbf{AUC (Classic)} & \textbf{AUC (Early)} & \textbf{$\Delta$ Perf.} & \textbf{CO$_2$eq (kg) C.} & \textbf{CO$_2$eq (kg) E.} & \textbf{$\Delta$ Emiss.} \\
         \midrule
-        ChemBERTa   & 0.961 & 0.993 & \textcolor{blue}{+3.4\%} & $1.03 \times 10^{-3}$ & $3.70 \times 10^{-4}$ & \textbf{-63.9\%} \\
-        ChemBERTa-2 & 0.967 & 0.974 & \textcolor{blue}{+0.7\%} & $3.06 \times 10^{-4}$ & $2.50 \times 10^{-4}$ & \textbf{-18.3\%} \\
-        SELFormer   & 0.947 & 0.993 & \textcolor{blue}{+4.9\%} & $1.85 \times 10^{-3}$ & $5.62 \times 10^{-4}$ & \textbf{-69.6\%} \\
-        SMILES-BERT & 0.974 & 0.928 & \textcolor{red}{-4.7\%} & $1.87 \times 10^{-3}$ & $8.72 \times 10^{-4}$ & \textbf{-53.5\%} \\
+        ChemBERTa   & 0.819 & 0.850 & \textcolor{blue}{+3.8\%} & $9.87 \times 10^{-4}$ & $5.68 \times 10^{-4}$ & \textbf{-42.4\%} \\
+        ChemBERTa-2 & 0.817 & 0.855 & \textcolor{blue}{+4.6\%} & $3.87 \times 10^{-4}$ & $2.70 \times 10^{-4}$ & \textbf{-30.3\%} \\
+        SELFormer   & 0.819 & 0.832 & \textcolor{blue}{+1.6\%} & $1.52 \times 10^{-3}$ & $1.18 \times 10^{-3}$ & \textbf{-22.4\%} \\
+        SMILES-BERT & 0.789 & 0.844 & \textcolor{blue}{+7.0\%} & $2.71 \times 10^{-3}$ & $1.07 \times 10^{-3}$ & \textbf{-60.5\%} \\
+        GraphMAE (W10) & 0.680 & 0.667 & \textcolor{red}{-1.9\%} & $1.07 \times 10^{-4}$ & $7.18 \times 10^{-5}$ & \textbf{-33.0\%} \\
+        GraphMAE (W25) & 0.711 & 0.700 & \textcolor{red}{-1.5\%} & $1.91 \times 10^{-4}$ & $1.65 \times 10^{-4}$ & \textbf{-13.6\%} \\
+        GraphMAE (W50) & 0.758 & 0.748 & \textcolor{red}{-1.3\%} & $3.50 \times 10^{-4}$ & $4.17 \times 10^{-4}$ & \textit{+19.1\%} \\
         \bottomrule
     \end{tabular}
-    \caption{Confronto su dataset BACE. In alcuni casi (ChemBERTa, SELFormer), la versione Early ha performato meglio, suggerendo che il training prolungato portava ad overfitting.}
+    \caption{Confronto su dataset BACE. In alcuni casi (ChemBERTa, SMILES-BERT), la versione Early ha performato meglio, suggerendo che il training prolungato portava ad overfitting.}
 \end{table}
 
 \begin{figure}[H]
@@ -74,18 +100,21 @@ Metriche utilizzate: RSE (Relative Squared Error - minore è meglio).
 
 \begin{table}[H]
     \centering
-    \small
+    \tiny
     \begin{tabular}{lcccccc}
         \toprule
         \textbf{Modello} & \textbf{RSE (Classic)} & \textbf{RSE (Early)} & \textbf{$\Delta$ Perf.} & \textbf{CO$_2$eq (kg) C.} & \textbf{CO$_2$eq (kg) E.} & \textbf{$\Delta$ Emiss.} \\
         \midrule
-        ChemBERTa   & 0.347 & 0.311 & \textcolor{blue}{+10.3\%} & $1.60 \times 10^{-2}$ & $3.37 \times 10^{-3}$ & \textbf{-78.9\%} \\
-        ChemBERTa-2 & 0.279 & 0.345 & \textcolor{red}{-23.6\%}  & $2.07 \times 10^{-3}$ & $6.08 \times 10^{-4}$ & \textbf{-70.6\%} \\
-        SELFormer   & 0.328 & 0.393 & \textcolor{red}{-19.8\%}  & $3.16 \times 10^{-2}$ & $6.51 \times 10^{-3}$ & \textbf{-79.4\%} \\
-        SMILES-BERT & 1.000 & 1.000 & \textit{Invar.}           & $3.25 \times 10^{-2}$ & $9.90 \times 10^{-3}$ & \textbf{-69.5\%} \\
+        ChemBERTa   & 0.306 & 0.289 & \textcolor{blue}{+5.5\%} & $1.93 \times 10^{-2}$ & $1.13 \times 10^{-2}$ & \textbf{-41.2\%} \\
+        ChemBERTa-2 & 0.337 & 0.280 & \textcolor{blue}{+16.9\%} & $3.52 \times 10^{-3}$ & $1.11 \times 10^{-3}$ & \textbf{-68.5\%} \\
+        SELFormer   & 0.567 & 0.280 & \textcolor{blue}{+50.6\%} & $4.76 \times 10^{-2}$ & $1.92 \times 10^{-2}$ & \textbf{-59.7\%} \\
+        SMILES-BERT & 1.009 & 0.980 & \textcolor{blue}{+2.9\%} & $5.22 \times 10^{-2}$ & $1.65 \times 10^{-2}$ & \textbf{-68.4\%} \\
+        GraphMAE (W10) & 0.411 & 0.525 & \textcolor{red}{-27.7\%} & $9.64 \times 10^{-3}$ & $9.72 \times 10^{-4}$ & \textbf{-89.9\%} \\
+        GraphMAE (W25) & 0.423 & 0.481 & \textcolor{red}{-13.7\%} & $8.73 \times 10^{-3}$ & $2.51 \times 10^{-3}$ & \textbf{-71.2\%} \\
+        GraphMAE (W50) & 0.417 & 0.454 & \textcolor{red}{-8.9\%} & $9.53 \times 10^{-3}$ & $4.81 \times 10^{-3}$ & \textbf{-49.5\%} \\
         \bottomrule
     \end{tabular}
-    \caption{Confronto su dataset CEP. Nota: Per RSE, un valore più basso indica una performance migliore. Una $\Delta$ Perf negativa indica un peggioramento dell'errore (aumento del RSE).}
+    \caption{Confronto su dataset CEP. Nota: Per RSE, un valore più basso indica una performance migliore.}
 \end{table}
 
 \begin{figure}[H]
@@ -100,19 +129,23 @@ Metriche utilizzate: RSE (minore è meglio).
 
 \begin{table}[H]
     \centering
-    \small
+    \tiny
     \begin{tabular}{lcccccc}
         \toprule
         \textbf{Modello} & \textbf{RSE (Classic)} & \textbf{RSE (Early)} & \textbf{$\Delta$ Perf.} & \textbf{CO$_2$eq (kg) C.} & \textbf{CO$_2$eq (kg) E.} & \textbf{$\Delta$ Emiss.} \\
         \midrule
-        ChemBERTa   & 0.513 & 0.725 & \textcolor{red}{-41.3\%} & $2.43 \times 10^{-3}$ & $6.48 \times 10^{-4}$ & \textbf{-73.3\%} \\
-        ChemBERTa-2 & 0.547 & 0.699 & \textcolor{red}{-27.8\%} & $4.81 \times 10^{-4}$ & $2.86 \times 10^{-4}$ & \textbf{-40.5\%} \\
-        SELFormer   & 0.642 & 0.695 & \textcolor{red}{-8.3\%}  & $4.62 \times 10^{-3}$ & $1.11 \times 10^{-3}$ & \textbf{-76.0\%} \\
-        SMILES-BERT & 0.692 & 0.752 & \textcolor{red}{-8.7\%}  & $4.73 \times 10^{-3}$ & $1.57 \times 10^{-3}$ & \textbf{-66.7\%} \\
+        ChemBERTa   & 0.525 & 0.601 & \textcolor{red}{-14.5\%} & $4.90 \times 10^{-3}$ & $1.34 \times 10^{-3}$ & \textbf{-72.7\%} \\
+        ChemBERTa-2 & 0.452 & 0.452 & \textit{Invar.} & $8.20 \times 10^{-4}$ & $3.40 \times 10^{-4}$ & \textbf{-58.5\%} \\
+        SELFormer   & 0.655 & 0.649 & \textcolor{blue}{+0.9\%} & $3.30 \times 10^{-3}$ & $2.85 \times 10^{-3}$ & \textbf{-13.6\%} \\
+        SMILES-BERT & 0.655 & 0.725 & \textcolor{red}{-10.7\%} & $4.75 \times 10^{-3}$ & $2.49 \times 10^{-3}$ & \textbf{-47.6\%} \\
+        GraphMAE (W10) & 0.608 & 0.968 & \textcolor{red}{-59.2\%} & $1.31 \times 10^{-3}$ & $1.36 \times 10^{-4}$ & \textbf{-89.6\%} \\
+        GraphMAE (W25) & 0.608 & 0.830 & \textcolor{red}{-36.5\%} & $1.31 \times 10^{-3}$ & $3.33 \times 10^{-4}$ & \textbf{-74.6\%} \\
+        GraphMAE (W50) & 0.608 & 0.685 & \textcolor{red}{-12.7\%} & $1.32 \times 10^{-3}$ & $6.53 \times 10^{-4}$ & \textbf{-50.5\%} \\
         \bottomrule
     \end{tabular}
     \caption{Confronto su Lipophilicity. Qui si nota il trade-off più marcato: grandi risparmi energetici corrispondono a una perdita significativa di precisione nel modello.}
 \end{table}
+
 
 \begin{figure}[H]
     \centering
@@ -127,15 +160,18 @@ Metriche utilizzate: RSE (minore è meglio).
 
 \begin{table}[H]
     \centering
-    \small
+    \tiny
     \begin{tabular}{lcccccc}
         \toprule
         \textbf{Modello} & \textbf{RSE (Classic)} & \textbf{RSE (Early)} & \textbf{$\Delta$ Perf.} & \textbf{CO$_2$eq (kg) C.} & \textbf{CO$_2$eq (kg) E.} & \textbf{$\Delta$ Emiss.} \\
         \midrule
-        ChemBERTa   & 0.926 & 0.931 & \textcolor{red}{-0.5\%}   & $5.49 \times 10^{-3}$ & $1.29 \times 10^{-3}$ & \textbf{-76.4\%} \\
-        ChemBERTa-2 & 0.995 & 0.870 & \textcolor{blue}{+12.6\%} & $8.40 \times 10^{-4}$ & $3.42 \times 10^{-4}$ & \textbf{-59.3\%} \\
-        SELFormer   & 1.068 & 0.991 & \textcolor{blue}{+7.2\%}  & $1.07 \times 10^{-2}$ & $2.31 \times 10^{-3}$ & \textbf{-78.3\%} \\
-        SMILES-BERT & 1.018 & 0.994 & \textcolor{blue}{+2.4\%}  & $1.10 \times 10^{-2}$ & $3.45 \times 10^{-3}$ & \textbf{-68.6\%} \\
+        ChemBERTa   & 1.058 & 1.149 & \textcolor{red}{-8.6\%} & $4.47 \times 10^{-3}$ & $5.00 \times 10^{-3}$ & \textit{+11.9\%} \\
+        ChemBERTa-2 & 0.878 & 0.849 & \textcolor{blue}{+3.3\%} & $6.74 \times 10^{-4}$ & $5.15 \times 10^{-4}$ & \textbf{-23.6\%} \\
+        SELFormer   & 1.164 & 1.096 & \textcolor{blue}{+5.8\%} & $1.07 \times 10^{-2}$ & $1.18 \times 10^{-2}$ & \textit{+10.0\%} \\
+        SMILES-BERT & 0.991 & 0.991 & \textit{Invar.} & $1.53 \times 10^{-2}$ & $5.61 \times 10^{-3}$ & \textbf{-63.4\%} \\
+        GraphMAE (W10) & 0.915 & 0.933 & \textcolor{red}{-2.0\%} & $8.80 \times 10^{-4}$ & $5.45 \times 10^{-4}$ & \textbf{-38.1\%} \\
+        GraphMAE (W25) & 0.980 & 0.953 & \textcolor{blue}{+2.8\%} & $1.66 \times 10^{-3}$ & $1.37 \times 10^{-3}$ & \textbf{-17.4\%} \\
+        GraphMAE (W50) & 1.104 & 1.057 & \textcolor{blue}{+4.3\%} & $2.96 \times 10^{-3}$ & $2.73 \times 10^{-3}$ & \textbf{-7.8\%} \\
         \bottomrule
     \end{tabular}
     \caption{Confronto su Malaria. In questo dataset, l'Early Stopping ha spesso migliorato o mantenuto invariate le performance (RSE più basso o simile), suggerendo che i modelli tendono a saturare o overfittare rapidamente su questi dati.}
@@ -146,6 +182,15 @@ Metriche utilizzate: RSE (minore è meglio).
     \includegraphics[width=0.7\textwidth]{tradeoff_experiments_malaria.png}
     \caption{Andamento del RSE su Malaria per ChemBERTa: confronto tra versione Classic ed Early Stopping}
 \end{figure}
+
+\subsection{Analisi Sensibilità Warmup (GraphMAE)}
+Per il modello GraphMAE, è stata condotta un'analisi specifica variando il numero di epoche di warmup (10, 25, 50) per valutare l'impatto sulla stabilità dell'Early Stopping.
+
+\begin{itemize}
+    \item \textbf{Dataset Complessi (CEP, Lipophilicity)}: Un warmup più lungo (50 epoche) si è rivelato fondamentale. Con soli 10 epoche di warmup, il modello tendeva a fermarsi troppo presto, risultando in un RSE molto più alto (es. Lipophilicity: RSE 0.96 con W10 vs 0.68 con W50).
+    \item \textbf{Dataset Malaria}: Al contrario, un warmup prolungato ha peggiorato le performance (RSE 1.05 con W50 vs 0.93 con W10), suggerendo che per questo dataset il modello raggiunge rapidamente il picco di performance e ulteriori epoche portano a overfitting.
+    \item \textbf{Trade-off}: L'uso di un warmup di 50 epoche garantisce prestazioni più robuste e vicine al fine-tuning con early-stopping classico, pur mantenendo un risparmio energetico significativo (circa 50\%).
+\end{itemize}
 
 \section{Conclusioni}
 L'analisi dimostra che l'approccio \textit{Green AI} tramite Early Stopping adattivo permette di ridurre drasticamente le emissioni di CO$_2$eq (spesso tra il 60\% e l'80\%). 

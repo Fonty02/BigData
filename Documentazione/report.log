@@ -1,4 +1,4 @@
-This is LuaHBTeX, Version 1.21.0 (MiKTeX 25.3) (format=lualatex 2025.3.29)  6 DEC 2025 12:41
+This is LuaHBTeX, Version 1.21.0 (MiKTeX 25.3) (format=lualatex 2025.3.29)  12 DEC 2025 12:03
  system commands enabled.
  file:line:error style messages enabled.
 **c:/Users/fonta/Desktop/Uni/Repo/BigD/Documentazione/report
@@ -465,62 +465,51 @@ File: epstopdf-sys.cfg 2021/03/18 v2.0 Configuration of epstopdf for MiKTeX
 
 Package caption Info: Begin \AtBeginDocument code.
 Package caption Info: End \AtBeginDocument code.
-
-Overfull \hbox (60.73885pt too wide) in paragraph at lines 52--62
- [][] 
- []
-
-
+LaTeX Font Info:    Trying to load font information for T1+lmtt on input line 4
+2.
+(C:/Users/fonta/AppData/Local/Programs/MiKTeX/tex/latex/lm/t1lmtt.fd
+File: t1lmtt.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
+)
 
 [1
 
 {C:/Users/fonta/AppData/Local/MiKTeX/fonts/map/pdftex/pdftex.map}]
-<tradeoff_experiments_bace.png, id=16, 722.7pt x 578.16pt>
+<tradeoff_experiments_bace.png, id=18, 722.7pt x 578.16pt>
 File: tradeoff_experiments_bace.png Graphic file (type png)
 <use tradeoff_experiments_bace.png>
-Package luatex.def Info: tradeoff_experiments_bace.png  used on input line 67.
+Package luatex.def Info: tradeoff_experiments_bace.png  used on input line 93.
 (luatex.def)             Requested size: 318.66948pt x 254.93814pt.
 
-Overfull \hbox (54.82277pt too wide) in paragraph at lines 78--88
- [][] 
- []
 
-<tradeoff_experiments_cep.png, id=17, 722.7pt x 578.16pt>
+[2]
+<tradeoff_experiments_cep.png, id=30, 722.7pt x 578.16pt>
 File: tradeoff_experiments_cep.png Graphic file (type png)
 <use tradeoff_experiments_cep.png>
-Package luatex.def Info: tradeoff_experiments_cep.png  used on input line 93.
+Package luatex.def Info: tradeoff_experiments_cep.png  used on input line 122.
 (luatex.def)             Requested size: 318.66948pt x 254.93814pt.
 
 
-[2<./tradeoff_experiments_bace.png>]
-Overfull \hbox (54.82277pt too wide) in paragraph at lines 104--114
- [][] 
- []
-
-<tradeoff_experiments_lipophilicity.png, id=24, 722.7pt x 578.16pt>
+[3<./tradeoff_experiments_bace.png>]
+<tradeoff_experiments_lipophilicity.png, id=35, 722.7pt x 578.16pt>
 File: tradeoff_experiments_lipophilicity.png Graphic file (type png)
 <use tradeoff_experiments_lipophilicity.png>
 Package luatex.def Info: tradeoff_experiments_lipophilicity.png  used on input 
-line 119.
+line 152.
 (luatex.def)             Requested size: 318.66948pt x 254.93814pt.
 
 
-[3<./tradeoff_experiments_cep.png>]
-Overfull \hbox (54.82277pt too wide) in paragraph at lines 131--141
- [][] 
- []
-
-<tradeoff_experiments_malaria.png, id=29, 722.7pt x 578.16pt>
+[4<./tradeoff_experiments_cep.png>]
+<tradeoff_experiments_malaria.png, id=40, 722.7pt x 578.16pt>
 File: tradeoff_experiments_malaria.png Graphic file (type png)
 <use tradeoff_experiments_malaria.png>
 Package luatex.def Info: tradeoff_experiments_malaria.png  used on input line 1
-46.
+82.
 (luatex.def)             Requested size: 318.66948pt x 254.93814pt.
 
 
-[4<./tradeoff_experiments_lipophilicity.png>]
+[5<./tradeoff_experiments_lipophilicity.png>]
 
-[5<./tradeoff_experiments_malaria.png>] (./report.aux)
+[6<./tradeoff_experiments_malaria.png>] (./report.aux)
  ***********
 LaTeX2e <2024-11-01> patch level 2
 L3 programming layer <2025-01-18>
@@ -528,34 +517,41 @@ L3 programming layer <2025-01-18>
 )
 
 Here is how much of LuaTeX's memory you used:
- 6617 strings out of 475506
+ 6655 strings out of 475506
  100000,662416 words of node,token memory allocated
  541 words of node memory still in use:
    7 hlist, 2 vlist, 2 rule, 5 glue, 4 kern, 1 glyph, 14 attribute, 53 glue_spec
 , 9 attribute_list, 1 write nodes
-   avail lists: 2:1117,3:115,4:64,5:217,6:35,7:5597,8:22,9:386,10:18,11:729
- 29512 multiletter control sequences out of 65536+600000
- 58 fonts using 3683479 bytes
- 57i,10n,62p,426b,348s stack positions out of 10000i,1000n,20000p,200000b,200000s
-{C:/Users/fonta/AppData/Local/Programs/MiKTeX/fonts/enc/dvips/lm/lm-ts1.enc}{C:/
-Users/fonta/AppData/Local/Programs/MiKTeX/fonts/enc/dvips/lm/lm-ec.enc}<C:/Users
+   avail lists: 2:1117,3:129,4:84,5:238,6:38,7:4915,8:22,9:350,10:15,11:659
+ 29545 multiletter control sequences out of 65536+600000
+ 50 fonts using 3185127 bytes
+ 57i,10n,62p,426b,331s stack positions out of 10000i,1000n,20000p,200000b,200000s
+{C:/Users/fonta/AppData/Local/Programs/MiKTeX/fonts/enc/dvips/lm/lm-ec.enc}{C:/U
+sers/fonta/AppData/Local/Programs/MiKTeX/fonts/enc/dvips/lm/lm-ts1.enc}<C:/Users
 /fonta/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi10.pfb><
 C:/Users/fonta/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi
-8.pfb><C:/Users/fonta/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/
-cm/cmr10.pfb><C:/Users/fonta/AppData/Local/Programs/MiKTeX/fonts/type1/public/am
-sfonts/cm/cmr7.pfb><C:/Users/fonta/AppData/Local/Programs/MiKTeX/fonts/type1/pub
-lic/amsfonts/cm/cmr8.pfb><C:/Users/fonta/AppData/Local/Programs/MiKTeX/fonts/typ
-e1/public/amsfonts/cm/cmsy10.pfb><C:/Users/fonta/AppData/Local/Programs/MiKTeX/f
-onts/type1/public/amsfonts/cm/cmsy7.pfb><C:/Users/fonta/AppData/Local/Programs/M
-iKTeX/fonts/type1/public/amsfonts/cm/cmsy8.pfb><C:/Users/fonta/AppData/Local/Pro
-grams/MiKTeX/fonts/type1/public/lm/lmbx10.pfb><C:/Users/fonta/AppData/Local/Prog
-rams/MiKTeX/fonts/type1/public/lm/lmbx12.pfb><C:/Users/fonta/AppData/Local/Progr
-ams/MiKTeX/fonts/type1/public/lm/lmr10.pfb><C:/Users/fonta/AppData/Local/Program
-s/MiKTeX/fonts/type1/public/lm/lmr12.pfb><C:/Users/fonta/AppData/Local/Programs/
-MiKTeX/fonts/type1/public/lm/lmri10.pfb>
-Output written on report.pdf (5 pages, 412670 bytes).
+6.pfb><C:/Users/fonta/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/
+cm/cmmi8.pfb><C:/Users/fonta/AppData/Local/Programs/MiKTeX/fonts/type1/public/am
+sfonts/cm/cmr10.pfb><C:/Users/fonta/AppData/Local/Programs/MiKTeX/fonts/type1/pu
+blic/amsfonts/cm/cmr5.pfb><C:/Users/fonta/AppData/Local/Programs/MiKTeX/fonts/ty
+pe1/public/amsfonts/cm/cmr6.pfb><C:/Users/fonta/AppData/Local/Programs/MiKTeX/fo
+nts/type1/public/amsfonts/cm/cmr8.pfb><C:/Users/fonta/AppData/Local/Programs/MiK
+TeX/fonts/type1/public/amsfonts/cm/cmsy10.pfb><C:/Users/fonta/AppData/Local/Prog
+rams/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy5.pfb><C:/Users/fonta/AppData/Loc
+al/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy6.pfb><C:/Users/fonta/AppD
+ata/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy8.pfb><C:/Users/fon
+ta/AppData/Local/Programs/MiKTeX/fonts/type1/public/lm/lmbx10.pfb><C:/Users/font
+a/AppData/Local/Programs/MiKTeX/fonts/type1/public/lm/lmbx12.pfb><C:/Users/fonta
+/AppData/Local/Programs/MiKTeX/fonts/type1/public/lm/lmbx6.pfb><C:/Users/fonta/A
+ppData/Local/Programs/MiKTeX/fonts/type1/public/lm/lmr10.pfb><C:/Users/fonta/App
+Data/Local/Programs/MiKTeX/fonts/type1/public/lm/lmr12.pfb><C:/Users/fonta/AppDa
+ta/Local/Programs/MiKTeX/fonts/type1/public/lm/lmr6.pfb><C:/Users/fonta/AppData/
+Local/Programs/MiKTeX/fonts/type1/public/lm/lmri10.pfb><C:/Users/fonta/AppData/L
+ocal/Programs/MiKTeX/fonts/type1/public/lm/lmri7.pfb><C:/Users/fonta/AppData/Loc
+al/Programs/MiKTeX/fonts/type1/public/lm/lmtt10.pfb>
+Output written on report.pdf (6 pages, 546656 bytes).
 
-PDF statistics: 82 PDF objects out of 1000 (max. 8388607)
+PDF statistics: 113 PDF objects out of 1000 (max. 8388607)
  0 named destinations out of 1000 (max. 131072)
  1 words of extra memory for PDF output out of 10000 (max. 100000000)
 

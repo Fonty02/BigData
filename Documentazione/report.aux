@@ -6,18 +6,21 @@
 \@writefile{toc}{\contentsline {section}{\numberline {1}Metodologia e Gestione dei Dati}{1}{}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {1.1}Preprocessing e Scaffold Splitting}{1}{}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {1.2}Meccanismo di Early Stopping (AER)}{1}{}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {2}Risultati Sperimentali}{1}{}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.1}Dataset BACE (Classificazione)}{1}{}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces Confronto su dataset BACE. In alcuni casi (ChemBERTa, SELFormer), la versione Early ha performato meglio, suggerendo che il training prolungato portava ad overfitting.}}{2}{}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces Curva ROC per ChemBERTa su BACE: confronto tra versione Classic ed Early Stopping}}{2}{}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.2}Dataset CEP (Regressione)}{2}{}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces Confronto su dataset CEP. Nota: Per RSE, un valore più basso indica una performance migliore. Una $\Delta $ Perf negativa indica un peggioramento dell'errore (aumento del RSE).}}{2}{}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Andamento del RSE su CEP per ChemBERTa: confronto tra versione Classic ed Early Stopping}}{3}{}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.3}Dataset Lipophilicity (Regressione)}{3}{}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {3}{\ignorespaces Confronto su Lipophilicity. Qui si nota il trade-off più marcato: grandi risparmi energetici corrispondono a una perdita significativa di precisione nel modello.}}{3}{}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces Andamento del RSE su Lipophilicity per ChemBERTa: confronto tra versione Classic ed Early Stopping}}{4}{}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.4}Dataset Malaria (Regressione)}{4}{}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {4}{\ignorespaces Confronto su Malaria. In questo dataset, l'Early Stopping ha spesso migliorato o mantenuto invariate le performance (RSE più basso o simile), suggerendo che i modelli tendono a saturare o overfittare rapidamente su questi dati.}}{4}{}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces Andamento del RSE su Malaria per ChemBERTa: confronto tra versione Classic ed Early Stopping}}{5}{}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {3}Conclusioni}{5}{}\protected@file@percent }
-\gdef \@abspage@last{5}
+\@writefile{toc}{\contentsline {section}{\numberline {2}Configurazione Sperimentale}{1}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.1}Parametri di Training}{1}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {3}Risultati Sperimentali}{2}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.1}Dataset BACE (Classificazione)}{2}{}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces Confronto su dataset BACE. In alcuni casi (ChemBERTa, SMILES-BERT), la versione Early ha performato meglio, suggerendo che il training prolungato portava ad overfitting.}}{2}{}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces Curva ROC per ChemBERTa su BACE: confronto tra versione Classic ed Early Stopping}}{3}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.2}Dataset CEP (Regressione)}{3}{}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces Confronto su dataset CEP. Nota: Per RSE, un valore più basso indica una performance migliore.}}{3}{}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Andamento del RSE su CEP per ChemBERTa: confronto tra versione Classic ed Early Stopping}}{4}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.3}Dataset Lipophilicity (Regressione)}{4}{}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {3}{\ignorespaces Confronto su Lipophilicity. Qui si nota il trade-off più marcato: grandi risparmi energetici corrispondono a una perdita significativa di precisione nel modello.}}{4}{}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces Andamento del RSE su Lipophilicity per ChemBERTa: confronto tra versione Classic ed Early Stopping}}{5}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.4}Dataset Malaria (Regressione)}{5}{}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {4}{\ignorespaces Confronto su Malaria. In questo dataset, l'Early Stopping ha spesso migliorato o mantenuto invariate le performance (RSE più basso o simile), suggerendo che i modelli tendono a saturare o overfittare rapidamente su questi dati.}}{5}{}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces Andamento del RSE su Malaria per ChemBERTa: confronto tra versione Classic ed Early Stopping}}{6}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.5}Analisi Sensibilità Warmup (GraphMAE)}{6}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {4}Conclusioni}{6}{}\protected@file@percent }
+\gdef \@abspage@last{6}
