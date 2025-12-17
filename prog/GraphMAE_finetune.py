@@ -81,9 +81,14 @@ def scaffold_split_indices(df, smiles_col='smiles', label_col='label', sizes=(0.
         smiles = getattr(row, smiles_col)
         mol = Chem.MolFromSmiles(smiles)
         if mol is not None:
-            scaffold = MurckoScaffold.MurckoScaffoldSmiles(mol=mol, includeChirality=False)
-            scaffolds[scaffold].append(row.Index)
-            valid_indices.append(row.Index)
+            try:
+                Chem.SanitizeMol(mol)
+                scaffold = MurckoScaffold.MurckoScaffoldSmiles(mol=mol, includeChirality=False)
+                scaffolds[scaffold].append(row.Index)
+                valid_indices.append(row.Index)
+            except Exception:
+                # Salta molecole con valenze invalide o altri errori chimici
+                pass
             
     print(f"Molecole valide: {len(valid_indices)}/{len(df)}")
 

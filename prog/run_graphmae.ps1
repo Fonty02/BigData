@@ -29,8 +29,8 @@ $script = 'GraphMAE_finetune.py'
 
 # Lista dei dataset presenti nella cartella data/dataset_finetuning
 $datasets = @(
-    "cep",
-    "lipophilicity"
+    "bbbp",
+    "hiv"
 )
 
 # Lista dei valori di warmup epochs

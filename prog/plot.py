@@ -9,6 +9,8 @@ FILES = [
     "experiments_cep.csv",
     "experiments_lipophilicity.csv",
     "experiments_malaria.csv",
+    "experiments_bbbp.csv",
+    "experiments_hiv.csv",
 ]
 
 def plot_tradeoff(df, metric, out_name, title):

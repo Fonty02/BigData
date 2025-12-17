@@ -6,6 +6,14 @@ REGRESSION_DATASETS = {"cep", "malaria", "lipophilicity", "delaney"}
 
 
 def _find_label_column(raw_df: pd.DataFrame, dataset_name: str) -> str:
+    # Specific handling for known datasets
+    if dataset_name.lower() == "bbbp":
+        if "p_np" in raw_df.columns:
+            return "p_np"
+    elif dataset_name.lower() == "hiv":
+        if "HIV_active" in raw_df.columns:
+            return "HIV_active"
+    
     candidates = [c for c in ["Class", "class", "label", "activity", "PCE", "exp", "value", "p_np", "HIV_active"] 
                   if c in raw_df.columns]
     if candidates:
