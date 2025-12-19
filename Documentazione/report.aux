@@ -1,26 +1,55 @@
 \relax 
 \providecommand \babel@aux [2]{\global \let \babel@toc \@gobbletwo }
 \@nameuse{bbl@beforestart}
-\babel@aux{italian}{}
-\babel@aux{italian}{}
-\@writefile{toc}{\contentsline {section}{\numberline {1}Metodologia e Gestione dei Dati}{1}{}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {1.1}Preprocessing e Scaffold Splitting}{1}{}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {1.2}Meccanismo di Early Stopping (AER)}{1}{}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {2}Configurazione Sperimentale}{1}{}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.1}Parametri di Training}{1}{}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {3}Risultati Sperimentali}{2}{}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.1}Dataset BACE (Classificazione)}{2}{}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces Confronto su dataset BACE. In alcuni casi (ChemBERTa, SMILES-BERT), la versione Early ha performato meglio, suggerendo che il training prolungato portava ad overfitting.}}{2}{}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces Curva ROC per ChemBERTa su BACE: confronto tra versione Classic ed Early Stopping}}{3}{}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.2}Dataset CEP (Regressione)}{3}{}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces Confronto su dataset CEP. Nota: Per RSE, un valore più basso indica una performance migliore.}}{3}{}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Andamento del RSE su CEP per ChemBERTa: confronto tra versione Classic ed Early Stopping}}{4}{}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.3}Dataset Lipophilicity (Regressione)}{4}{}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {3}{\ignorespaces Confronto su Lipophilicity. Qui si nota il trade-off più marcato: grandi risparmi energetici corrispondono a una perdita significativa di precisione nel modello.}}{4}{}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces Andamento del RSE su Lipophilicity per ChemBERTa: confronto tra versione Classic ed Early Stopping}}{5}{}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.4}Dataset Malaria (Regressione)}{5}{}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {4}{\ignorespaces Confronto su Malaria. In questo dataset, l'Early Stopping ha spesso migliorato o mantenuto invariate le performance (RSE più basso o simile), suggerendo che i modelli tendono a saturare o overfittare rapidamente su questi dati.}}{5}{}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces Andamento del RSE su Malaria per ChemBERTa: confronto tra versione Classic ed Early Stopping}}{6}{}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.5}Analisi Sensibilità Warmup (GraphMAE)}{6}{}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {4}Conclusioni}{6}{}\protected@file@percent }
-\gdef \@abspage@last{6}
+\providecommand\hyper@newdestlabel[2]{}
+\providecommand\HyField@AuxAddToFields[1]{}
+\providecommand\HyField@AuxAddToCoFields[2]{}
+\babel@aux{english}{}
+\@writefile{toc}{\contentsline {section}{\numberline {1}Business Understanding}{3}{section.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.1}Context and Motivation}{3}{subsection.1.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.2}Project Objectives}{3}{subsection.1.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {2}Data Understanding}{3}{section.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.1}Dataset Description}{3}{subsection.2.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {3}Data Preparation}{4}{section.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.1}Preprocessing}{4}{subsection.3.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.2}Scaffold Splitting}{4}{subsection.3.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.3}Robustness Check}{4}{subsection.3.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {4}Modeling}{4}{section.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.1}Architectures Used}{4}{subsection.4.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.2}Training Strategy: AER}{4}{subsection.4.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.3}Experimental Configuration}{4}{subsection.4.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {5}Evaluation}{5}{section.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.1}BACE Dataset (Classification)}{5}{subsection.5.1}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces Comparison on BACE dataset. In some cases (ChemBERTa, SMILES-BERT), the Early version performed better, suggesting that prolonged training led to overfitting.}}{5}{table.caption.2}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces ROC curve for ChemBERTa on BACE: comparison between Classic and Early Stopping versions}}{5}{figure.caption.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.2}Dataset HIV (Classification)}{5}{subsection.5.2}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces Comparison on HIV dataset. Transformers show positive performance gains with early stopping, while GNNs maintain stable performance with energy savings.}}{6}{table.caption.4}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces ROC curve for ChemBERTa on HIV: comparison between Classic and Early Stopping}}{6}{figure.caption.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.3}Dataset BBBP (Classification)}{6}{subsection.5.3}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {3}{\ignorespaces Comparison on BBBP dataset. BBBP shows variable behavior: some models maintain stability while others show trade-offs between performance and emissions.}}{6}{table.caption.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.4}CEP Dataset (Regression)}{6}{subsection.5.4}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {4}{\ignorespaces Comparison on CEP dataset.}}{7}{table.caption.7}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces RSE trend on CEP for ChemBERTa: comparison between Classic and Early Stopping versions}}{7}{figure.caption.8}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.5}Lipophilicity Dataset (Regression)}{7}{subsection.5.5}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {5}{\ignorespaces Comparison on Lipophilicity. Here the most pronounced trade-off is observed: large energy savings correspond to a significant loss in model precision.}}{7}{table.caption.9}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces RSE trend on Lipophilicity for ChemBERTa: comparison between Classic and Early Stopping versions}}{8}{figure.caption.10}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.6}Malaria Dataset (Regression)}{8}{subsection.5.6}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {6}{\ignorespaces Comparison on Malaria dataset.}}{8}{table.caption.11}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces RSE trend on Malaria for ChemBERTa: comparison between Classic and Early Stopping versions}}{9}{figure.caption.12}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.7}Warmup Sensitivity Analysis (GraphMAE)}{9}{subsection.5.7}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.8}Explainability Analysis}{9}{subsection.5.8}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.8.1}Motivation and Methodology}{9}{subsubsection.5.8.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.8.2}Feature Engineering}{10}{subsubsection.5.8.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.8.3}Key Findings}{10}{subsubsection.5.8.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Factors Influencing Emissions}{10}{section*.13}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces Feature importance for emissions (left) and performance (right) based on partial correlation analysis. The values shown are normalized relative contributions, with $\rho $ indicating the direction and strength of the partial correlation.}}{10}{figure.caption.14}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Factors Influencing Performance}{11}{section*.15}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.8.4}Added Variable Plots (Partial Regression Plots)}{11}{subsubsection.5.8.4}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces Added variable plots showing residual relationships between top features and target variables after controlling for all other features. Top row shows relationships with emissions; bottom row shows relationships with performance. The trend lines indicate the partial correlation direction.}}{11}{figure.caption.16}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.8.5}Implications for Green AI Strategy}{12}{subsubsection.5.8.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {6}Deployment and Conclusions}{12}{section.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.1}Key Findings Across Datasets}{12}{subsection.6.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.2}Explainability Insights}{12}{subsection.6.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.3}Practical Recommendations}{13}{subsection.6.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.4}Broader Impact}{13}{subsection.6.4}\protected@file@percent }
+\gdef \@abspage@last{13}
