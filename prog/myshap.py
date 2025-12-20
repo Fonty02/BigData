@@ -252,16 +252,16 @@ def create_plots(analysis, output_dir="."):
     
     imp_em = analysis['importance_emissions'].sort_values()
     axes[0].barh(imp_em.index, imp_em.values, color='orangered')
-    axes[0].set_title('Importanza (Partial Correlation) su Emissioni', fontweight='bold')
-    axes[0].set_xlabel('Contributo Unico Relativo')
+    axes[0].set_title('Importance (Partial Correlation) on Emissions', fontweight='bold')
+    axes[0].set_xlabel('Unique Relative Contribution')
     for i, (feat, val) in enumerate(imp_em.items()):
         raw_corr = analysis['corr_emissions'][feat]
         axes[0].text(val, i, f" $\\rho$={raw_corr:.2f}", va='center', fontsize=9)
 
     imp_perf = analysis['importance_performance'].sort_values()
     axes[1].barh(imp_perf.index, imp_perf.values, color='green')
-    axes[1].set_title('Importanza (Partial Correlation) su Performance', fontweight='bold')
-    axes[1].set_xlabel('Contributo Unico Relativo')
+    axes[1].set_title('Importance (Partial Correlation) on Performance', fontweight='bold')
+    axes[1].set_xlabel('Unique Relative Contribution')
     for i, (feat, val) in enumerate(imp_perf.items()):
         raw_corr = analysis['corr_performance'][feat]
         axes[1].text(val, i, f" $\\rho$={raw_corr:.2f}", va='center', fontsize=9)

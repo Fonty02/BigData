@@ -79,15 +79,15 @@ def plot_tradeoff(df, metric, out_name, title):
             c = colors.get(var_key, 'blue')
             plt.scatter(row['emissions'], row[metric], color=c, s=100, zorder=2)
 
-    plt.xlabel("Emissioni (kg CO2eq)")
+    plt.xlabel("Emissions (kg CO2eq)")
     ylabel = metric.upper()
     plt.ylabel(ylabel)
-    plt.title(f"Trade-off {ylabel} vs Emissioni — {title}")
+    plt.title(f"Trade-off {ylabel} vs Emissions — {title}")
     plt.xscale('log')
     plt.grid(True, which='both', ls='--', alpha=0.5)
 
     legend_elements = [
-        Line2D([0], [0], marker='o', color='w', label='Emission Early Stopping', markerfacecolor='green', markersize=10),
+        Line2D([0], [0], marker='o', color='w', label='GFT', markerfacecolor='green', markersize=10),
         Line2D([0], [0], marker='o', color='w', label='Classic Early Stopping', markerfacecolor='red', markersize=10)
     ]
     plt.legend(handles=legend_elements, loc='upper right')
