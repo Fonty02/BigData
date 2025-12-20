@@ -1,0 +1,85 @@
+\section{Business Understanding}
+
+\subsection{Context and Motivation} In recent years, the field of computational chemistry has seen a surge in the use of Deep Learning models, such as Transformers \cite{Attention} and Graph Neural Networks (GNNs) \cite{GNN_Scarselli}, to accelerate drug discovery. However, the trend towards larger and more complex models—often referred to as "Red AI" \cite{GreenAI}—has led to a dramatic increase in computational costs and energy consumption. Following the \textbf{Green AI} paradigm \cite{GreenAI}, this project addresses the urgent need to make these processes sustainable. The motivation is twofold: ethical (reducing the carbon footprint) and economical (lowering the computational resources required for training), without abandoning the precision required for scientific discovery. Furthermore, this approach aligns with the \textbf{UN 2030 Agenda for Sustainable Development} \cite{UN2030}, specifically contributing to \textbf{Goal 12 (Responsible Consumption and Production)} and \textbf{Goal 13 (Climate Action)}, by promoting energy-efficient innovation in the technological sector.
+\begin{figure}[H]
+    \centering
+    \begin{minipage}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{img/gnn.png}
+        \vspace{4pt}
+        \small (a) Graph Neural Networks architecture
+    \end{minipage}\hfill
+    \begin{minipage}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{img/transformers.png}
+        \vspace{4pt}
+        \small (b) Transformer architecture
+    \end{minipage}
+
+    \vspace{8pt}
+
+\begin{minipage}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=0.6\linewidth]{img/green.png}
+        \vspace{4pt}\\
+        \small (c) Green AI vs Red AI
+    \end{minipage}\hfill
+    \begin{minipage}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{img/agenda.png}
+        \vspace{4pt}
+        \small (d) UN 2030 Agenda for Sustainable Development Goals
+    \end{minipage}
+\end{figure}
+\subsection{Business Objectives} 
+\subsubsection{Requirements}
+The primary business objective is to demonstrate that sustainable practices can be integrated into molecular property prediction pipelines without significant loss in performance. Specifically, the goals are: 
+\begin{itemize} 
+    \item \textbf{Sustainability:} Drastically reduce the CO$_2$ equivalent emissions associated with the fine tuning phase of already existing pre-trained models. 
+    \item \textbf{Reliability:} Ensure that the "greener" models remain accurate enough to be useful for chemists and researchers in real-world screening scenarios.
+\end{itemize}
+
+
+\subsubsection{Expectations} From a project management perspective, the experiment will be considered successful if: Based on previous similar approaches \cite{Fonty} the expected impact includes a reduction in CO$_2$ equivalent emissions between 20\% and 50\%, while maintaining predictive performance within a 10\% margin of error compared to traditional fine-tuning methods.
+
+\subsection{Assess situation}
+ Concerning models, the following architectures will be considered:
+\begin{itemize}
+    \item \textbf{ChemBERTa:} A Transformer-based model pre-trained on a large corpus of molecular SMILES strings \cite{ChemBERTa}.
+    \item \textbf{ChemBERTa2}: A bigger and improved version of ChemBERTa \cite{ChemBERTa2}.
+    \item \textbf{SELFormer}: A recent Transformer architecture specifically designed for molecular property prediction tasks \cite{SELFormer}.
+    \item \textbf{SMILES\_BERT}: A BERT model trained on a list of SMILES strings for various chemical tasks \cite{SMILESBERT}.
+    \item \textbf{GraphMAE}: A GNN pre-trained using a masked autoencoder approach \cite{GraphMAE}.
+\end{itemize}
+For energy consumption tracking CodeCarbon \cite{CodeCarbon} will be used to monitor and log the energy usage and carbon emissions during the fine-tuning processes. CodeCarbon uses the following formula to estimate CO$_2$ emissions:
+\begin{equation}
+    \text{CO}_2 \text{eq} = \text{Energy Consumption (kWh)} \times \text{Carbon Intensity (gCO}_2\text{eq/kWh)}
+\end{equation}
+where Carbon Intensity depends on the geographical location (in this case Apulia, Italy) and energy source mix of the data center where the computations are performed.\\
+The project will use MoleculeNet \cite{MoleculeNet}, a collection of datasets for predicting molecular properties. In particular the following one will be used:
+\begin{itemize}
+    \item \textbf{HIV}: A dataset used to predict if the HIV is active or inactive
+    \item \textbf{BACE}: A dataset used to predict inhibitors of the human $\beta$-secretase 1 (BACE-1) enzyme (a target for Alzheimer's disease).
+    \item \textbf{BBBP}: A dataset used to predict blood-brain barrier penetration (this barrier is crucial for drug delivery to the brain).
+    \item \textbf{Lipophilicity}: A dataset used to predict the octanol/water distribution coefficient (logD at pH 7.4) of small molecules (a key property in drug design).
+    \item \textbf{Malaria}: A dataset used to predict the ability of compounds to inhibit the growth of the malaria parasite \textit{Plasmodium falciparum}.
+    \item \textbf{CEP}: A dataset used to predict the efficiency of organic photovoltaic molecules (used in solar cells).
+\end{itemize}
+
+The hardware resources available for the experiments include:
+\begin{itemize}
+    \item \textbf{CPU}: Intel(R) Core(TM) i7\-14650HX
+    \item \textbf{GPU}: NVIDIA GeForce RTX 4070 Laptop GPU with 8GB of VRAM
+    \item \textbf{RAM}: 16 GB of SO-DIMM DDR5
+\end{itemize}
+
+\subsection{Data Mining Goals} To achieve the business objectives outlined above, these objectives are translated into specific technical Data Mining goals. The core task involves supervised learning (both classification and regression) on molecular datasets. 
+Dataset used for classification tasks are: HIV, BACE, BBB, while for regression tasks are: Lipophilicity, Malaria, CEP.
+
+The technical objectives are: 
+\begin{itemize} 
+    \item \textbf{Algorithm Implementation:} Develop and integrate the \textbf{Green FineTuning (GFT)} mechanism into the training loop of Transformers and GNNs. 
+    \item \textbf{Metric Evaluation:} Compare the GFT strategy against standard fine-tuning procedures using: Area under the Curve (ROC-AUC) for classification and Relative Squared Error (RSE) for regression tasks. 
+    \item \textbf{Trade-off Analysis:} Identify the optimal stopping point where the marginal gain in accuracy no longer justifies the marginal cost in emissions.
+    \item \textbf{Explainability:} Analyze the results obtained and, using post-hoc explainability techniques, identify the factors that mainly contribute to sustainable fine-tuning
+\end{itemize}

@@ -4,52 +4,133 @@
 \providecommand\hyper@newdestlabel[2]{}
 \providecommand\HyField@AuxAddToFields[1]{}
 \providecommand\HyField@AuxAddToCoFields[2]{}
+\citation{EMARecSys}
 \babel@aux{english}{}
-\@writefile{toc}{\contentsline {section}{\numberline {1}Business Understanding}{3}{section.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {1.1}Context and Motivation}{3}{subsection.1.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {1.2}Project Objectives}{3}{subsection.1.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {2}Data Understanding}{3}{section.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.1}Dataset Description}{3}{subsection.2.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {3}Data Preparation}{4}{section.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.1}Preprocessing}{4}{subsection.3.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.2}Scaffold Splitting}{4}{subsection.3.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.3}Robustness Check}{4}{subsection.3.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {4}Modeling}{4}{section.4}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.1}Architectures Used}{4}{subsection.4.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.2}Training Strategy: AER}{4}{subsection.4.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.3}Experimental Configuration}{4}{subsection.4.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {5}Evaluation}{5}{section.5}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {5.1}BACE Dataset (Classification)}{5}{subsection.5.1}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces Comparison on BACE dataset. In some cases (ChemBERTa, SMILES-BERT), the Early version performed better, suggesting that prolonged training led to overfitting.}}{5}{table.caption.2}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces ROC curve for ChemBERTa on BACE: comparison between Classic and Early Stopping versions}}{5}{figure.caption.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {5.2}Dataset HIV (Classification)}{5}{subsection.5.2}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces Comparison on HIV dataset. Transformers show positive performance gains with early stopping, while GNNs maintain stable performance with energy savings.}}{6}{table.caption.4}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces ROC curve for ChemBERTa on HIV: comparison between Classic and Early Stopping}}{6}{figure.caption.5}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {5.3}Dataset BBBP (Classification)}{6}{subsection.5.3}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {3}{\ignorespaces Comparison on BBBP dataset. BBBP shows variable behavior: some models maintain stability while others show trade-offs between performance and emissions.}}{6}{table.caption.6}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {5.4}CEP Dataset (Regression)}{6}{subsection.5.4}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {4}{\ignorespaces Comparison on CEP dataset.}}{7}{table.caption.7}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces RSE trend on CEP for ChemBERTa: comparison between Classic and Early Stopping versions}}{7}{figure.caption.8}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {5.5}Lipophilicity Dataset (Regression)}{7}{subsection.5.5}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {5}{\ignorespaces Comparison on Lipophilicity. Here the most pronounced trade-off is observed: large energy savings correspond to a significant loss in model precision.}}{7}{table.caption.9}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces RSE trend on Lipophilicity for ChemBERTa: comparison between Classic and Early Stopping versions}}{8}{figure.caption.10}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {5.6}Malaria Dataset (Regression)}{8}{subsection.5.6}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {6}{\ignorespaces Comparison on Malaria dataset.}}{8}{table.caption.11}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces RSE trend on Malaria for ChemBERTa: comparison between Classic and Early Stopping versions}}{9}{figure.caption.12}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {5.7}Warmup Sensitivity Analysis (GraphMAE)}{9}{subsection.5.7}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {5.8}Explainability Analysis}{9}{subsection.5.8}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.8.1}Motivation and Methodology}{9}{subsubsection.5.8.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.8.2}Feature Engineering}{10}{subsubsection.5.8.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.8.3}Key Findings}{10}{subsubsection.5.8.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Factors Influencing Emissions}{10}{section*.13}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces Feature importance for emissions (left) and performance (right) based on partial correlation analysis. The values shown are normalized relative contributions, with $\rho $ indicating the direction and strength of the partial correlation.}}{10}{figure.caption.14}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Factors Influencing Performance}{11}{section*.15}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.8.4}Added Variable Plots (Partial Regression Plots)}{11}{subsubsection.5.8.4}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces Added variable plots showing residual relationships between top features and target variables after controlling for all other features. Top row shows relationships with emissions; bottom row shows relationships with performance. The trend lines indicate the partial correlation direction.}}{11}{figure.caption.16}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.8.5}Implications for Green AI Strategy}{12}{subsubsection.5.8.5}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {6}Deployment and Conclusions}{12}{section.6}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {6.1}Key Findings Across Datasets}{12}{subsection.6.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {6.2}Explainability Insights}{12}{subsection.6.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {6.3}Practical Recommendations}{13}{subsection.6.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {6.4}Broader Impact}{13}{subsection.6.4}\protected@file@percent }
-\gdef \@abspage@last{13}
+\citation{Attention}
+\citation{GNN_Scarselli}
+\citation{GreenAI}
+\citation{GreenAI}
+\citation{UN2030}
+\citation{Fonty}
+\@writefile{toc}{\contentsline {section}{\numberline {1}Business Understanding}{4}{section.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.1}Context and Motivation}{4}{subsection.1.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.2}Business Objectives}{4}{subsection.1.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {1.2.1}Requirements}{4}{subsubsection.1.2.1}\protected@file@percent }
+\citation{ChemBERTa}
+\citation{ChemBERTa2}
+\citation{SELFormer}
+\citation{SMILESBERT}
+\citation{GraphMAE}
+\citation{CodeCarbon}
+\citation{MoleculeNet}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {1.2.2}Expectations}{5}{subsubsection.1.2.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.3}Assess situation}{5}{subsection.1.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.4}Data Mining Goals}{6}{subsection.1.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {2}Data Understanding}{7}{section.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.1}SMILES Representation}{7}{subsection.2.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.2}Dataset Description}{7}{subsection.2.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.2.1}BACE}{7}{subsubsection.2.2.1}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces BACE raw CSV components}}{7}{table.caption.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.2.2}BBBP}{8}{subsubsection.2.2.2}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces BBBP raw CSV components}}{8}{table.caption.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.2.3}CEP}{8}{subsubsection.2.2.3}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {3}{\ignorespaces CEP raw CSV components}}{8}{table.caption.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.2.4}HIV}{8}{subsubsection.2.2.4}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {4}{\ignorespaces HIV raw CSV components}}{8}{table.caption.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.2.5}Malaria}{8}{subsubsection.2.2.5}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {5}{\ignorespaces Malaria raw CSV components}}{8}{table.caption.7}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.2.6}Lipophilicity}{9}{subsubsection.2.2.6}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {6}{\ignorespaces Lipophilicity raw CSV components}}{9}{table.caption.8}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.3}Data Exploration}{9}{subsection.2.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.4}Data Distribution Analysis}{9}{subsection.2.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.4.1}BACE}{9}{subsubsection.2.4.1}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces Data distribution analysis for BACE dataset}}{9}{figure.caption.9}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.4.2}BBBP}{10}{subsubsection.2.4.2}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Data distribution analysis for BBBP dataset}}{10}{figure.caption.10}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.4.3}CEP}{10}{subsubsection.2.4.3}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces Data distribution analysis for CEP dataset}}{10}{figure.caption.11}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.4.4}HIV}{11}{subsubsection.2.4.4}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces Data distribution analysis for HIV dataset}}{11}{figure.caption.12}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.4.5}Malaria}{11}{subsubsection.2.4.5}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces Data distribution analysis for Malaria dataset}}{11}{figure.caption.13}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.4.6}Lipophilicity}{12}{subsubsection.2.4.6}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces Data distribution analysis for Lipophilicity dataset}}{12}{figure.caption.14}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {3}Data Preparation}{13}{section.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.1}Preprocessing}{13}{subsection.3.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.1.1}SMILES Validation}{13}{subsubsection.3.1.1}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {7}{\ignorespaces Summary of SMILES validation results across datasets.}}{13}{table.caption.15}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.1.2}Graph Generation}{14}{subsubsection.3.1.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Node Featurization}{14}{section*.16}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Edge Featurization}{14}{section*.17}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Graph Construction and Serialization}{15}{section*.18}\protected@file@percent }
+\citation{Attention}
+\@writefile{toc}{\contentsline {section}{\numberline {4}Modelling}{16}{section.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.1}Architectures}{16}{subsection.4.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.1.1}Sequence-based Models (Transformers)}{16}{subsubsection.4.1.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.1.2}Graph Neural Networks}{16}{subsubsection.4.1.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.2}GFT Strategy}{16}{subsection.4.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.2.1}Formal Definition}{16}{subsubsection.4.2.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.2.2}Stopping Condition}{17}{subsubsection.4.2.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.3}Fine tuning details and hyperparameters}{17}{subsection.4.3}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {8}{\ignorespaces Fine tuning hyperparameters and configuration.}}{17}{table.caption.19}\protected@file@percent }
+\providecommand*\caption@xref[2]{\@setref\relax\@undefined{#1}}
+\newlabel{tab:hyperparameters}{{8}{17}{Fine tuning hyperparameters and configuration}{table.caption.19}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.3.1}Stopping criteria}{17}{subsubsection.4.3.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Classic Strategy}{17}{section*.20}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Green-Early Strategy (GFT)}{17}{section*.21}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.3.2}Data Splitting}{17}{subsubsection.4.3.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.4}Metrics}{18}{subsection.4.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.5}Results}{18}{subsection.4.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.5.1}BACE Dataset (Classification)}{18}{subsubsection.4.5.1}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {9}{\ignorespaces Comparison on Bace dataset}}{18}{table.caption.22}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.5.2}HIV Dataset (Classification)}{19}{subsubsection.4.5.2}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {10}{\ignorespaces Comparison on Hiv dataset}}{19}{table.caption.23}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.5.3}BBBP Dataset (Classification)}{19}{subsubsection.4.5.3}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {11}{\ignorespaces Comparison on Bbbp dataset}}{19}{table.caption.24}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.5.4}CEP Dataset (Regression)}{19}{subsubsection.4.5.4}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {12}{\ignorespaces Comparison on Cep dataset}}{19}{table.caption.25}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.5.5}Lipophilicity Dataset (Regression)}{19}{subsubsection.4.5.5}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {13}{\ignorespaces Comparison on Lipophilicity dataset}}{19}{table.caption.26}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.5.6}Malaria Dataset (Regression)}{19}{subsubsection.4.5.6}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {14}{\ignorespaces Comparison on Malaria dataset}}{19}{table.caption.27}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {5}Evaluation}{20}{section.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.1}BACE Dataset (Classification)}{20}{subsection.5.1}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces Trade-off comparison on BACE}}{20}{figure.caption.28}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.2}Dataset HIV (Classification)}{21}{subsection.5.2}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {8}{\ignorespaces Trade-off comparison on HIV}}{21}{figure.caption.29}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.3}Dataset BBBP (Classification)}{21}{subsection.5.3}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {9}{\ignorespaces Trade-off comparison on BBBP}}{22}{figure.caption.30}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.4}CEP Dataset (Regression)}{22}{subsection.5.4}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {10}{\ignorespaces Trade-off comparison on CEP}}{23}{figure.caption.31}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.5}Lipophilicity Dataset (Regression)}{23}{subsection.5.5}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {11}{\ignorespaces Trade-off comparison on Lipophilicity}}{24}{figure.caption.32}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.6}Malaria Dataset (Regression)}{24}{subsection.5.6}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {12}{\ignorespaces Trade-off comparison on Malaria}}{25}{figure.caption.33}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.7}Explainability Analysis}{25}{subsection.5.7}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.7.1}Motivation and Methodology}{25}{subsubsection.5.7.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.7.2}Feature Engineering}{25}{subsubsection.5.7.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.7.3}Key Findings}{26}{subsubsection.5.7.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Factors Influencing Emissions}{26}{section*.34}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {13}{\ignorespaces Feature importance for emissions (left) and performance (right) based on partial correlation analysis. The values shown are normalized relative contributions, with $\rho $ indicating the direction and strength of the partial correlation.}}{26}{figure.caption.35}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Factors Influencing Performance}{26}{section*.36}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.7.4}Implications for GFT Strategy}{27}{subsubsection.5.7.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {6}Conclusions}{28}{section.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.1}Key Findings Across Datasets}{28}{subsection.6.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.2}Explainability Insights}{28}{subsection.6.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.3}Broader Impact}{29}{subsection.6.3}\protected@file@percent }
+\bibstyle{unsrt}
+\bibdata{report}
+\bibcite{EMARecSys}{1}
+\bibcite{Attention}{2}
+\bibcite{GNN_Scarselli}{3}
+\bibcite{GreenAI}{4}
+\bibcite{UN2030}{5}
+\bibcite{Fonty}{6}
+\bibcite{ChemBERTa}{7}
+\bibcite{ChemBERTa2}{8}
+\bibcite{SELFormer}{9}
+\bibcite{SMILESBERT}{10}
+\bibcite{GraphMAE}{11}
+\bibcite{CodeCarbon}{12}
+\bibcite{MoleculeNet}{13}
+\gdef \@abspage@last{30}

@@ -1,0 +1,157 @@
+\section{Data Understanding}
+\subsection{SMILES Representation}
+The datasets utilized in this study primarily rely on the \textbf{SMILES} (Simplified Molecular Input Line Entry System) notation to represent chemical structures. SMILES is a line notation for encoding molecular structures using short ASCII strings, which allows chemical information to be easily stored and processed by computers.
+
+
+
+In a SMILES string:
+\begin{itemize}
+    \item \textbf{Atoms} are represented by their atomic symbols (e.g., \texttt{C} for Carbon, \texttt{N} for Nitrogen). Upper case letters usually indicate aliphatic (an "open chain" or a "simple ring") atoms, while lower case letters (e.g., \texttt{c}, \texttt{n}) denote aromatic (a "complex ring") atoms.
+    \item \textbf{Bonds} are implied to be single unless specified otherwise. Double bonds are represented by \texttt{=}, triple bonds by \texttt{\#}, and aromatic bonds are often implicit or denoted by colons.
+    \item \textbf{Branching} is described using parentheses. For example, \texttt{CC(O)C} represents isopropanol.
+    \item \textbf{Ring closures} are indicated by pairs of digits following the ring atoms. For instance, \texttt{C1CCCCC1} represents cyclohexane, where the two \texttt{1}s indicate the connection point of the ring.
+\end{itemize}
+
+This representation is crucial for machine learning tasks in chemistry (Cheminformatics) as it converts complex 3D topological graphs into a sequential 1D format that can be tokenized and processed by sequence-based models (such as Transformers) or reconstructed into graphs for Graph Neural Networks.
+\subsection{Dataset Description}
+For the experiments, standard datasets from the \textbf{MoleculeNet} suite were
+used, representative of various chemical-physical and biological properties.
+The selected datasets include BACE, BBBP, CEP, HIV, MALARIA and Lipophilicity,
+covering both classification and regression tasks.
+
+\subsubsection{BACE}
+\begin{table}[H]
+    \centering
+    \begin{tabular}{p{0.30\linewidth} p{0.60\linewidth}}
+        \textbf{Component} & \textbf{Description}                                                                                                                   \\\hline
+        mol                & SMILES string representing the molecule                                                                                             \\
+        CID                & Compound identifier (string)                                                                                                     \\
+        Class              & Binary label - categorical                                                                                                      \\                                                                              \\
+        pIC50              & Numeric activity value - continue                                                                                                        \\
+        Descriptors        & Large set of chemical and topological descriptors (MW, AlogP, HBA, HBD, RB, Zagreb indices, Wiener index, connectivity indices, etc.). \\
+        Rows               & 1513 rows                                                                                                                   \\                                                                                               \\
+    \end{tabular}
+    \caption{BACE raw CSV components}
+\end{table}
+
+\subsubsection{BBBP}
+\begin{table}[H]
+    \centering
+    \begin{tabular}{p{0.30\linewidth} p{0.60\linewidth}}
+        \textbf{Component} & \textbf{Description}                                                               \\\hline
+        num                & Numeric progressive identifier - discrete                                                   \\
+        name               & Compound name (string)                                                            \\
+        p\_np              & Binary label indicating blood-brain barrier permeability - categorical \\
+        smiles             & SMILES string of the molecule                                                     \\
+        Rows               & 2050 rows                                              \\                                        \\
+    \end{tabular}
+    \caption{BBBP raw CSV components}
+\end{table}
+
+\subsubsection{CEP}
+\begin{table}[H]
+    \centering
+    \begin{tabular}{p{0.30\linewidth} p{0.60\linewidth}}
+        \textbf{Component} & \textbf{Description}                                                                                    \\\hline
+        smiles             & SMILES string of the organic molecule.                                                                  \\
+        PCE                & Power Conversion Efficiency - continue                     \\
+        Rows               & 29978 rows                                                                                    \\                                                                           \\
+    \end{tabular}
+    \caption{CEP raw CSV components}
+\end{table}
+
+\subsubsection{HIV}
+\begin{table}[H]
+    \centering
+    \begin{tabular}{p{0.30\linewidth} p{0.60\linewidth}}
+        \textbf{Component} & \textbf{Description}                                                                                                \\\hline
+        smiles             & SMILES string representing the molecule.                                                                            \\
+        activity           & Descriptive activity label (e.g. CI = Confirmed Inactive, CA = Confirmed Active, CM = Confirmed Moderately Active) - categorical \\
+        HIV\_active        & Binary numeric label (CA and CM are considered as the same) - categorical                                                                     \\
+        Rows               & 41126 rows                                                                                                \\                                                                    \\
+    \end{tabular}
+    \caption{HIV raw CSV components}
+\end{table}
+
+\subsubsection{Malaria}
+\begin{table}[H]
+    \centering
+    \begin{tabular}{p{0.30\linewidth} p{0.60\linewidth}}
+        \textbf{Component} & \textbf{Description}                                                                                \\\hline
+        smiles             & SMILES string of the compound                                                                     \\
+        activity           & Numeric activity value against malaria - continuous\\
+        Rows               & 9999 rows.                                                                                 \\                                                        \\
+    \end{tabular}
+    \caption{Malaria raw CSV components}
+\end{table}
+
+\subsubsection{Lipophilicity}
+\begin{table}[H]
+    \centering
+    \begin{tabular}{p{0.30\linewidth} p{0.60\linewidth}}
+        \textbf{Component} & \textbf{Description}                                                    \\\hline
+        CMPD\_CHEMBLID     & ChEMBL compound identifier                        \\
+        exp                & Experimental lipophilicity value — continue \\
+        smiles             & SMILES string of the molecule                                          \\
+        Rows               & 4200 rows.                                                      \\                                  \\
+    \end{tabular}
+    \caption{Lipophilicity raw CSV components}
+\end{table}
+
+\subsection{Data Exploration}
+An initial exploratory data analysis (EDA) was conducted to understand the characteristics of each dataset. This included checking for missing values and visualization of the distributions.
+Luckily, all datasets were found to be clean, with no missing values.
+
+\subsection{Data Distribution Analysis}
+
+\subsubsection{BACE}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{img/bace_analysis.png}
+    \caption{Data distribution analysis for BACE dataset}
+\end{figure}
+From the analysis it can be observed that classes are slightly imbalanced, with a higher number of inactive molecules compared to active ones. Regarding the lenght of the SMILES strings, most molecules have a length between 40 and 80 characters, with a few outliers having longer or shorter representations.
+
+\subsubsection{BBBP}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{img/bbbp_analysis.png}
+    \caption{Data distribution analysis for BBBP dataset}
+\end{figure}
+
+From the analysis it can be observed that classes are strongly imbalanced, with a higher number of inactive molecules compared to active ones. Regarding the lenght of the SMILES strings, most molecules have a length between 40 and 60 characters, with a few outliers having longer or shorter representations.
+
+
+\subsubsection{CEP}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{img/cep_analysis.png}
+    \caption{Data distribution analysis for CEP dataset}
+\end{figure}
+From the analysis it can be observed that PCE values are very close in the space with respect to the lenght of the SMILES strings with few outliers having lower PCE values. The lenght of the SMILES strings seems to follow a normal distribution
+
+\subsubsection{HIV}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{img/hiv_analysis.png}
+    \caption{Data distribution analysis for HIV dataset}
+\end{figure}
+From the analysis it can be observed that classes are strongly imbalanced, with a higher number of inactive molecules compared to active ones. Regarding the lenght of the SMILES strings, it seems to follow a normal distribution with some outliers having longer representations.
+
+\subsubsection{Malaria}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{img/malaria_analysis.png}
+    \caption{Data distribution analysis for Malaria dataset}
+\end{figure}
+From the analysis it can be observed that activity values are very close in the space with respect to the lenght of the SMILES strings with few outliers having lower values. The lenght of the SMILES strings seems to follow a normal distribution
+
+
+\subsubsection{Lipophilicity}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{img/lipophilicity_analysis.png}
+    \caption{Data distribution analysis for Lipophilicity dataset}
+\end{figure}
+From the analysis it can be observed that exp values are very close in the space with respect to the lenght of the SMILES strings with few outliers having lower values. The lenght of the SMILES strings are concentrated between 20 and 80
+

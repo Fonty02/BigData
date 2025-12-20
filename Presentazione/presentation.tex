@@ -1,0 +1,369 @@
+\documentclass{beamer}
+\usetheme{Madrid}
+\usecolortheme{default}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[english]{babel}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{amsmath}
+
+% Show a title slide at the start of each section
+\AtBeginSection[]{
+    \begin{frame}
+        \centering
+        \vfill
+        {\huge \insertsectionhead}
+        \vfill
+    \end{frame}
+}
+
+\title{Green Fine Tuning for Molecular Property Prediction}
+\author{Emanuele Fontana}
+\date{}
+
+\begin{document}
+
+\begin{frame}
+    \titlepage
+\end{frame}
+
+\begin{frame}{Outline}
+    \tableofcontents
+\end{frame}
+\section{Business Understanding}
+
+\begin{frame}{Context and Motivation}
+    \begin{itemize}
+        \item \textbf{Context}: Rise of Deep Learning in Drug Discovery (Transformers, GNNs).
+        \item \textbf{Problem}: "Red AI" trend leading to high computational costs and energy consumption.
+        \item \textbf{Solution}: \textbf{Green AI} paradigm - sustainable AI.
+        \item \textbf{Alignment}: UN 2030 Agenda for Sustainable Development.
+        \begin{itemize}
+            \item Goal 12: Responsible Consumption and Production.
+            \item Goal 13: Climate Action.
+        \end{itemize}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Business Objectives}
+    \begin{block}{Primary Goal}
+        Demonstrate that sustainable practices can be integrated into molecular property prediction pipelines without significant loss in performance.
+    \end{block}
+    \begin{itemize}
+        \item \textbf{Sustainability}: Drastically reduce CO$_2$eq emissions during fine-tuning.
+        \item \textbf{Reliability}: Maintain predictive accuracy for real-world use.
+    \end{itemize}
+    \begin{block}{Expectations}
+        \begin{itemize}
+            \item CO$_2$ reduction: 20\% - 50\%.
+            \item Performance margin: Within 10\% of traditional methods.
+        \end{itemize}
+    \end{block}
+\end{frame}
+
+
+\section{Data Understanding}
+
+
+\begin{frame}{Datasets (MoleculeNet)}
+    \textbf{Classification Tasks}:
+    \begin{itemize}
+        \item \textbf{HIV}: Predict if HIV is active or inactive.
+        \item \textbf{BACE}: Predict inhibitors of BACE-1 enzyme (Alzheimer's).
+        \item \textbf{BBBP}: Predict blood-brain barrier penetration.
+    \end{itemize}
+    
+    \vspace{0.5cm}
+    \textbf{Regression Tasks}:
+    \begin{itemize}
+        \item \textbf{Lipophilicity}: Predict octanol/water distribution coefficient.
+        \item \textbf{Malaria}: Predict inhibition of malaria parasite growth.
+        \item \textbf{CEP}: Predict efficiency of organic photovoltaic molecules.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Dataset Details}
+    \begin{table}
+        \centering
+        \begin{tabular}{lllr}
+            \toprule
+            \textbf{Dataset} & \textbf{Task} & \textbf{Key Components} & \textbf{Rows} \\
+            \midrule
+            BACE & Classification & mol, CID, Class, pIC50 & 1{,}513 \\
+            BBBP & Classification & num, name, p\_np, smiles & 2{,}050 \\
+            HIV & Classification & smiles, activity & 41{,}126 \\
+            CEP & Regression & smiles, PCE & 29{,}978 \\
+            Malaria & Regression & smiles, activity & 9{,}999 \\
+            Lipophilicity & Regression & CMPD\_CHEMBLID, exp, smiles & 4{,}200 \\
+            \bottomrule
+        \end{tabular}
+    \end{table}
+\end{frame}
+
+\begin{frame}{Data Representation: SMILES}
+    \textbf{SMILES} (Simplified Molecular Input Line Entry System):
+    \begin{itemize}
+        \item ASCII strings representing chemical structures.
+        \item \textbf{Atoms}: C, N, O, etc. (Upper: aliphatic, Lower: aromatic).
+        \item \textbf{Bonds}: Single (implicit), Double (=), Triple (\#).
+        \item \textbf{Branching}: Parentheses ().
+        \item \textbf{Rings}: Numbers (e.g., C1CCCCC1).
+    \end{itemize}
+    \vspace{0.5cm}
+    Crucial for converting 3D structures into 1D sequences for Transformers or Graphs for GNNs.
+\end{frame}
+
+\section{Data Preparation}
+\begin{frame}{Preprocessing Pipeline}
+    \begin{enumerate}
+        \item \textbf{SMILES Validation}:
+        \begin{itemize}
+            \item \textbf{Parsing}: Check syntax errors using RDKit.
+            \item \textbf{Sanitization}: Valence checks, Kekulization, Aromaticity detection.
+        \end{itemize}
+        \item \textbf{Data Variants}:
+        \begin{itemize}
+            \item \textbf{Transformer Variant}: SMILES string + Target label.
+            \item \textbf{Graph Variant}: Molecular graphs generated from SMILES.
+        \end{itemize}
+    \end{enumerate}
+\end{frame}
+
+\begin{frame}{Graph Generation (for GNNs)}
+    Conversion of SMILES to Graph $G = (V, E)$ using RDKit.
+    \begin{columns}
+        \column{0.5\textwidth}
+        \textbf{Node Features ($V$)}:
+        \begin{itemize}
+            \item Atomic Number
+            \item Chirality
+            \item Degree
+            \item Formal Charge
+            \item Hybridization
+            \item Aromaticity
+        \end{itemize}
+        
+        \column{0.5\textwidth}
+        \textbf{Edge Features ($E$)}:
+        \begin{itemize}
+            \item Bond Type
+            \item Stereochemistry
+            \item Conjugation
+        \end{itemize}
+    \end{columns}
+    \vspace{0.5cm}
+    Serialized as PyTorch Geometric \texttt{Data} objects (.pt files).
+\end{frame}
+
+\section{Modeling}
+\begin{frame}{Architectures}
+    \begin{columns}
+        \column{0.5\textwidth}
+        \textbf{Sequence-based (Transformers)}
+        \begin{itemize}
+            \item Input: SMILES strings.
+            \item Models:
+            \begin{itemize}
+                \item ChemBERTa
+                \item ChemBERTa-2
+                \item SELFormer
+                \item SMILES-BERT
+            \end{itemize}
+        \end{itemize}
+        
+        \column{0.5\textwidth}
+        \textbf{Graph-based (GNNs)}
+        \begin{itemize}
+            \item Input: Molecular Graphs.
+            \item Model:
+            \begin{itemize}
+                \item \textbf{GraphMAE}: Masked Autoencoder approach for self-supervised learning.
+            \end{itemize}
+        \end{itemize}
+    \end{columns}
+\end{frame}
+
+\begin{frame}{Green FineTuning (GFT) Strategy}
+    \textbf{Core Idea}: Stop training when marginal performance gain doesn't justify energy cost.
+    
+    \begin{block}{Instantaneous GFT Ratio}
+        \vspace{-0.1cm}
+        \begin{equation*}
+            GFT_t = \frac{\Delta P_t}{\Delta E_t} = \frac{Perf_t - Perf_{t-1}}{Emission_t - Emission_{t-1}}
+        \end{equation*}
+        \vspace{-0.2cm}
+        where:
+        \begin{itemize}
+            \item $\Delta P_t$ = improvement in validation metric at epoch $t$
+            \item $\Delta E_t$ = incremental CO$_2$eq emitted during epoch $t$
+        \end{itemize}
+    \end{block}
+    
+    \vspace{-0.1cm}
+    \begin{block}{Smoothed Trend (EMA)}
+        \vspace{-0.1cm}
+        To stabilize the volatile instantaneous efficiency:
+        \begin{equation*}
+            S_t = \alpha\,GFT_t + (1-\alpha)\,S_{t-1}
+        \end{equation*}
+        \vspace{-0.3cm}
+        where $\alpha=0.9$. Initialization: $S_0 = GFT_0$ (or $0$).
+        \vspace{0.1cm}
+    \end{block}
+\end{frame}
+
+\begin{frame}{GFT Stopping Rule}
+    \begin{block}{Stopping Condition}
+        Training stops when instantaneous efficiency falls below the smoothed trend:
+        \begin{equation*}
+            \text{Stop if } GFT_t < \beta \cdot S_t
+        \end{equation*}
+        where $\beta=0.2$ is the tolerance factor.
+    \end{block}
+
+    \begin{block}{Implementation Details}
+        \begin{itemize}
+            \item $Perf_t$ is the validation metric:
+            \begin{itemize}
+                \item ROC-AUC for classification tasks
+                \item Negative RMSE for regression tasks (to maintain "higher is better")
+            \end{itemize}
+            \item Warmup period: 3 epochs (Transformers), variable for GraphMAE
+            \item Energy tracking: CodeCarbon library
+        \end{itemize}
+    \end{block}
+\end{frame}
+
+\section{Evaluation}
+\begin{frame}{Results: Classification Tasks}
+    \begin{itemize}
+        \item \textbf{BACE}: 
+        \begin{itemize}
+            \item Transformers: +1.6\% to +7.0\% performance, -22\% to -60\% emissions.
+            \item Early stopping prevents overfitting.
+        \end{itemize}
+        \item \textbf{HIV}:
+        \begin{itemize}
+            \item Strong improvements (e.g., SELFormer +16.2\% perf, -44\% emissions).
+            \item ChemBERTa-2: Stable perf, -60.6\% emissions.
+        \end{itemize}
+        \item \textbf{BBBP}:
+        \begin{itemize}
+            \item Mixed results. Some models degrade (ChemBERTa -11.8\%).
+            \item SELFormer resilient (+6.9\% perf).
+        \end{itemize}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Trade-off: BACE}
+    \begin{center}
+        \includegraphics[width=0.9\textwidth]{../Documentazione/img/tradeoff_experiments_bace.png}
+    \end{center}
+\end{frame}
+
+\begin{frame}{Trade-off: HIV}
+    \begin{center}
+        \includegraphics[width=0.9\textwidth]{../Documentazione/img/tradeoff_experiments_hiv.png}
+    \end{center}
+\end{frame}
+
+\begin{frame}{Trade-off: BBBP}
+    \begin{center}
+        \includegraphics[width=0.9\textwidth]{../Documentazione/img/tradeoff_experiments_bbbp.png}
+    \end{center}
+\end{frame}
+
+\begin{frame}{Results: Regression Tasks}
+    \begin{itemize}
+        \item \textbf{CEP}:
+        \begin{itemize}
+            \item Excellent results. SELFormer: +50.6\% perf, -59.7\% emissions.
+            \item GraphMAE: Trade-off between warmup and performance.
+        \end{itemize}
+        \item \textbf{Lipophilicity}:
+        \begin{itemize}
+            \item Most challenging. Many models degrade.
+            \item Requires extended fine-tuning.
+        \end{itemize}
+        \item \textbf{Malaria}:
+        \begin{itemize}
+            \item Moderate success. ChemBERTa-2: +3.3\% perf, -23.6\% emissions.
+            \item GraphMAE benefits from longer warmup.
+        \end{itemize}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Trade-off: CEP}
+    \begin{center}
+        \includegraphics[width=0.9\textwidth]{../Documentazione/img/tradeoff_experiments_cep.png}
+    \end{center}
+\end{frame}
+
+\begin{frame}{Trade-off: Lipophilicity}
+    \begin{center}
+        \includegraphics[width=0.9\textwidth]{../Documentazione/img/tradeoff_experiments_lipophilicity.png}
+    \end{center}
+\end{frame}
+
+\begin{frame}{Trade-off: Malaria}
+    \begin{center}
+        \includegraphics[width=0.9\textwidth]{../Documentazione/img/tradeoff_experiments_malaria.png}
+    \end{center}
+\end{frame}
+
+\begin{frame}{Explainability Analysis}
+    \begin{itemize}
+        \item \textbf{Motivation}: understand which factors drive emissions and performance to improve GFT.
+        \item Use \textbf{Partial Correlation} to isolate each feature's unique contribution while controlling for others.
+        \item Valuable when features are collinear across experiments.
+    \end{itemize}
+\end{frame}
+
+
+\begin{frame}{Factors Influencing Emissions}
+    \begin{itemize}
+        \item \textbf{Top drivers}: Dataset Size ($\rho=0.65$), Epoch Efficiency ($\rho=0.26$).
+        \item \textbf{Interactions}: Epochs Used shows interaction effects with dataset size and efficiency.
+        \item \textbf{Model architecture}: moderate influence (num\_layers, hidden\_size, $\rho\approx0.12$).
+        \item \textbf{Early stopping}: minimal direct effect ($\rho=-0.05$) — its benefit is mediated by fewer epochs used.
+    \end{itemize}
+    \begin{center}
+        \includegraphics[width=0.8\textwidth]{../Documentazione/img/partial_correlation_importance.png}
+    \end{center}
+\end{frame}
+
+
+
+\section{Conclusions}
+\begin{frame}{Key Findings}
+    \begin{itemize}
+        \item \textbf{GFT Effectiveness}: Drastic emission reductions (60\%-80\%) often possible with maintained or improved accuracy.
+        \item \textbf{Classification vs Regression}:
+        \begin{itemize}
+            \item Classification: Often "win-win" (prevents overfitting).
+            \item Regression: Clearer trade-off, requires careful tuning.
+        \end{itemize}
+        \item \textbf{Explainability Insights}:
+        \begin{itemize}
+            \item \textbf{Dataset Size}: Dominant factor for emissions.
+            \item \textbf{Early Stopping}: Positively correlates with performance.
+        \end{itemize}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Recommendations}
+    \begin{enumerate}
+        \item \textbf{Implement GFT}: Standardize adaptive early stopping.
+        \item \textbf{Optimize Dataset Usage}: Focus on data quality over quantity.
+        \item \textbf{Task-Specific Tuning}: Adjust warmup epochs based on task complexity (especially for Regression/GNNs).
+        \item \textbf{Model Selection}: Transformers show high resilience in classification tasks.
+    \end{enumerate}
+    
+    \vspace{1cm}
+    \centering
+    \textbf{Thank You!}
+\end{frame}
+
+\end{document}

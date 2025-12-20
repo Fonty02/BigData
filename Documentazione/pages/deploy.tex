@@ -1,0 +1,52 @@
+\section{Conclusions}
+The analysis conducted demonstrates that the \textit{GFT} approach through adaptive Early Stopping permits drastic reductions in CO$_2$eq emissions (often between 60\% and 80\%) while maintaining competitive performance.
+
+\subsection{Key Findings Across Datasets}
+\begin{itemize}
+    \item In \textbf{classification} tasks (BACE, BBBP, HIV), emission reduction often occurs without penalizing accuracy, sometimes even improving it through overfitting prevention. Notably:
+    \begin{itemize}
+        \item BACE showed consistent improvements with early stopping across most transformer models (+3.8\% to +7.0\% for successful cases)
+        \item BBBP demonstrated robust performance maintenance with ChemBERTa and ChemBERTa-2 models
+        \item HIV exhibited strong results particularly with ChemBERTa-2 and SMILES-BERT
+    \end{itemize}
+    
+    \item In \textbf{regression} tasks (Lipophilicity, CEP, Malaria), a more tangible trade-off exists: stopping training prematurely can cost between 10\% and 40\% in terms of error (RSE), although on complex datasets like Malaria the effect is mitigated. Key observations:
+    \begin{itemize}
+        \item CEP showed exceptional results with SELFormer (+50.6\% improvement with early stopping)
+        \item Lipophilicity demonstrated the most pronounced trade-off, requiring careful balance between efficiency and accuracy
+        \item Malaria showed mixed results, with warmup configuration playing a critical role
+    \end{itemize}
+\end{itemize}
+
+\subsection{Explainability Insights}
+The partial correlation analysis revealed crucial insights for optimizing GFT strategies:
+
+\begin{itemize}
+    \item \textbf{Dataset size} emerges as the dominant factor affecting emissions, suggesting that data efficiency techniques should be a primary focus for emission reduction
+    \item \textbf{Early stopping} positively correlates with performance while reducing emissions, validating its effectiveness as a GFT strategy
+    \item \textbf{Model architecture} has surprisingly limited direct impact on emissions compared to training configuration, indicating that epoch optimization is more critical than model size reduction
+    \item \textbf{Warmup epochs} show complex, dataset-dependent relationships with performance, emphasizing the need for adaptive hyperparameter tuning
+\end{itemize}
+
+
+
+
+
+
+Based on our comprehensive analysis, the following best practices are recommended:
+
+\begin{enumerate}
+    \item \textbf{Implement GFT}: The GFT mechanism consistently provides substantial emission reductions (30-80\%) with minimal or even positive performance impacts, especially for classification tasks.
+    
+    \item \textbf{Optimize Dataset Usage}: Given that dataset size is the primary emission driver, invest in data quality over quantity. Techniques such as active learning, data pruning, and curriculum learning should be prioritized.
+    
+    \item \textbf{Task-Specific Warmup Tuning}: For regression tasks, particularly with GNN architectures, carefully tune warmup epochs based on dataset complexity. Start with longer warmup periods (50 epochs) for complex datasets and reduce for simpler ones.
+    
+    \item \textbf{Consider Transformer Models for Classification}: Transformer-based molecular models (ChemBERTa, ChemBERTa-2) consistently show better resilience to early stopping in classification tasks, making them preferred choices when emission reduction is a priority.
+    
+    \item \textbf{Monitor Partial Correlations}: Implement feature monitoring during training to identify which factors are most influencing emissions and performance in real-time, enabling dynamic optimization.
+\end{enumerate}
+
+\subsection{Broader Impact}
+In conclusion, this work highlights the significant potential of GFT strategies, particularly adaptive Early Stopping, to reduce the environmental footprint of molecular model fine-tuning without sacrificing performance. The findings advocate for a paradigm shift in model training practices, emphasizing efficiency and sustainability.
+By demonstrating that GFT is not merely about sacrifice but about intelligent optimization that can maintain or even enhance model quality, this work contributes to making sustainable AI practices more accessible and appealing to practitioners. The explainability framework provided enables researchers to make informed decisions about where to focus their optimization efforts for maximum environmental benefit with minimal performance cost.

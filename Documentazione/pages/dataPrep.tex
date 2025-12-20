@@ -1,0 +1,92 @@
+\section{Data Preparation}
+\subsection{Preprocessing}
+
+For all datasets, two variants were prepared to accommodate different model architectures:
+
+\begin{itemize}
+    \item \textbf{Transformer variant}: Only the SMILES string and the target class/label are retained. This format is suitable for sequence-based models, which process molecular representations as text sequences.
+    
+    \item \textbf{Graph variant}: Molecular graphs are generated from SMILES strings using the RDKit library. This representation captures the structural connectivity of atoms and bonds, making it ideal for graph neural networks like GraphMAE.
+\end{itemize}
+
+To ensure data quality, invalid SMILES strings were filtered out during preprocessing. A SMILES is considered valid if it can be successfully parsed into a molecular object by RDKit's \texttt{Chem.MolFromSmiles} function and passes sanitization checks (\texttt{Chem.SanitizeMol}). Invalid SMILES, which may represent malformed or chemically impossible structures, are excluded from the datasets to prevent errors in model training and evaluation.
+\subsubsection{SMILES Validation}
+Prior to graph generation, a rigorous validation pipeline is applied to ensure data integrity. Raw datasets often contain malformed strings or chemically impossible structures that can lead to runtime errors or degrade model performance.
+
+The validation process relies on RDKit's internal chemistry engine and consists of two main stages:
+
+\begin{enumerate}
+    \item \textbf{Parsing:} The raw SMILES string is parsed using the \texttt{Chem.MolFromSmiles} function. This step checks for syntax errors in the ASCII string (e.g., unclosed parentheses, invalid characters, or numbers indicating ring closures that do not match). If parsing fails, the function returns \texttt{None}, and the sample is discarded.
+    
+    \item \textbf{Sanitization:} Successfully parsed molecules undergo a sanitization process via \texttt{Chem.SanitizeMol}. This function performs a series of chemical consistency checks, including:
+    \begin{itemize}
+        \item \textbf{Valence Check:} Verifies that atoms do not exceed their maximum possible valence (e.g., a carbon atom with 5 bonds).
+        \item \textbf{Kekulization:} Converts aromatic rings into their alternating single-double bond representation (Kekulé form) to ensure structural correctness.
+        \item \textbf{Aromaticity Detection:} Identifies aromatic systems and ensures they obey Huckel's rule.
+    \end{itemize}
+\end{enumerate}
+
+Only molecules that pass both parsing and sanitization are retained for the final dataset. This filtering step ensures that the resulting graphs represent physically valid chemical entities.
+\begin{table}[H]
+    \centering
+    \begin{tabular}{l c c c}
+        \toprule
+        \textbf{Dataset} &  \textbf{Valid SMILES}\\
+        \midrule
+        BACE & 1.513 \\
+        BBBP & 2.039 \\
+        CEP & 29.978  \\
+        HIV & 41.119 \\
+        Malaria & 9.999 \\
+        Lipophilicity & 4.200 \\
+        \bottomrule
+    \end{tabular}
+    \caption{Summary of SMILES validation results across datasets.}
+\end{table}
+
+
+\subsubsection{Graph Generation}
+The transformation of 1D SMILES strings into graph structures is a critical step for enabling Geometric Deep Learning models. In this work, the graph generation process is performed using the \textbf{RDKit} library, which converts the raw string representation into a molecular graph object $G = (V, E)$.
+
+In this graph representation:
+\begin{itemize}
+    \item \textbf{Nodes ($V$)} represent the atoms in the molecule.
+    \item \textbf{Edges ($E$)} represent the chemical bonds connecting them.
+\end{itemize}
+
+The process involves extracting specific chemical features for both atoms and bonds to create rich numerical representations (node features matrix $X$ and edge attributes $E_{attr}$).
+
+\paragraph{Node Featurization}
+For each atom $v \in V$, a feature vector $x_v$ is constructed using to capture essential chemical properties. The extracted features include:
+\begin{itemize}
+    \item \textbf{Atomic Number:} Specifies the element type (e.g., C, N, O, F, etc.).
+    \item \textbf{Chirality:} Describes the stereochemical configuration (e.g., unspecified, tetrahedral CW/CCW).
+    \item \textbf{Degree:} The number of covalent bonds the atom forms.
+    \item \textbf{Formal Charge:} The electrical charge assigned to the atom.
+    \item \textbf{Num. Explicit Hs:} The number of hydrogen atoms explicitly attached.
+    \item \textbf{Radical Electrons:} The number of unpaired electrons.
+    \item \textbf{Hybridization:} The orbital hybridization state ($sp$, $sp^2$, $sp^3$, etc.).
+    \item \textbf{Aromaticity:} A boolean flag indicating whether the atom is part of an aromatic ring system.
+    \item \textbf{Explicit Valence:} The explicit valence of the atom.
+\end{itemize}
+This results in a node feature matrix $X \in \mathbb{R}^{|V| \times F_{node}}$, where $|V|$ is the number of atoms and $F_{node}$ is the dimensionality of the atom feature vector.
+
+\paragraph{Edge Featurization}
+For each bond $e_{ij} \in E$ connecting atom $i$ and atom $j$, a feature vector is created to describe the bond properties:
+\begin{itemize}
+    \item \textbf{Bond Type:} Single, Double, Triple, or Aromatic.
+    \item \textbf{Stereochemistry:} Stereo configuration (e.g., None, Z, E, Any).
+    \item \textbf{Conjugation:} Boolean flag indicating if the bond is conjugated.
+\end{itemize}
+The connectivity of the graph is stored in coordinate format (COO), creating an edge index tensor necessary for message-passing operations in GNNs.
+
+\paragraph{Graph Construction and Serialization}
+Once the feature extraction is complete, the individual components are converted into PyTorch tensors and aggregated into a unified structure. Specifically:
+\begin{itemize}
+    \item The node features matrix $X$ is converted to a tensor of shape $[|V|, F_{node}]$.
+    \item The connectivity list is converted to an \texttt{edge\_index} tensor of shape $[2, |E|]$ (LongTensor).
+    \item The edge attributes are converted to a tensor of shape $[|E|, F_{edge}]$.
+    \item The target label $y$ is attached as a tensor (e.g., float for regression tasks or long for classification).
+\end{itemize}
+
+These tensors are encapsulated into a single PyTorch Geometric \texttt{Data} object, which acts as a container for the entire graph instance. Finally, the processed dataset is serialized and saved to disk as a binary file with the \texttt{.pt} extension using \texttt{torch.save}. This format allows for efficient loading during the training phase, enabling the \texttt{DataLoader} to dynamically batch multiple graphs into a single large disconnected graph for parallel processing on the GPU.

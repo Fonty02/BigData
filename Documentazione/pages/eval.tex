@@ -1,0 +1,157 @@
+\section{Evaluation}
+
+This section analyzes the experimental results obtained by applying the GFT strategy across various datasets and model architectures with respect to the Business Objectives defined earlier. The evaluation focuses on visualizing the trade-off between CO$_2$ equivalent emissions and predictive performance, as well as understanding the factors influencing these outcomes through explainability techniques.
+
+\subsection{BACE Dataset (Classification)}
+
+The BACE dataset demonstrates highly favorable results for the GFT, particularly with Transformer-based models. All four Transformer architectures (ChemBERTa, ChemBERTa-2, SELFormer, SMILES-BERT) show performance improvements ranging from +1.6\% to +7.0\% when using early stopping, with SMILES-BERT achieving the most substantial gain of +7.0\%. This suggests that early stopping effectively prevents overfitting on this dataset.
+
+Emission reductions are consistently strong across Transformer models, ranging from -22.4\% to -60.5\%, with SMILES-BERT achieving the highest emission reduction of -60.5\% while simultaneously delivering the best performance improvement. This represents an ideal GFT scenario where environmental benefits align with enhanced model performance.
+
+GraphMAE models show more mixed results, with slight performance degradations (-1.3\% to -1.9\%) but still achieving emission reductions in most configurations. Notably, GraphMAE W50 shows an emission increase of +19.0\%, indicating that longer warmup periods may not be beneficial for this dataset complexity.
+
+This suggests that Transformer architectures pre-trained on molecular corpora tends to overfit after few epochs on BACE (in fact GFT used less epochs than classic fine tuning while achieving better results).
+Surprisingly, GFT with 50 epochs warmup for GraphMAE leads to an higher emission than classic fine tuning, probably because the emission is "justified" by a better performance, but in reality the model is overfitting too, finding the best trade-off in the middle (25 epochs warmup).
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{img/tradeoff_experiments_bace.png}
+    \caption{Trade-off comparison on BACE}
+\end{figure}
+\subsection{Dataset HIV (Classification)}
+
+The HIV dataset presents particularly striking results for GFT, with some of the most dramatic performance improvements observed across all datasets. ChemBERTa shows exceptional improvement of +14.8\%, though this comes at the cost of a +22.1\% increase in emissions, representing one of the few cases where performance gains outweigh emission savings.
+
+SELFormer and SMILES-BERT demonstrate remarkable consistency with improvements of +16.2\% and +16.6\% respectively, while achieving substantial emission reductions of -44.0\% and -33.1\%. ChemBERTa-2 maintains stable performance (-0.1\%) while delivering significant emission savings of -60.6\%.
+
+GraphMAE models show minimal performance impact (-1.1\% to +0.3\%) with consistent emission reductions across all warmup configurations. The W50 configuration even achieves a slight performance improvement (+0.3\%) while maintaining emission savings of -14.8\%, suggesting that after 50 epochs the model starts to overfit.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{img/tradeoff_experiments_hiv.png}
+    \caption{Trade-off comparison on HIV}
+\end{figure}
+
+\subsection{Dataset BBBP (Classification)}
+
+The BBBP dataset reveals more challenging trade-offs, highlighting the importance of model selection for GFT strategies. The results show significant variability across different architectures, with some models experiencing substantial performance degradations.
+
+Notably, ChemBERTa and SMILES-BERT show significant performance drops of -11.8\% and -19.2\% respectively, indicating that early stopping may be premature for these models on this dataset. However, SELFormer demonstrates resilience with a +6.9\% improvement while achieving -12.1\% emission reduction, suggesting that certain architectures are inherently more compatible with early stopping strategies.
+
+ChemBERTa-2 shows the most concerning pattern with both performance degradation (-13.5\%) and a slight emission increase (+4.2\%), indicating poor optimization dynamics. GraphMAE models show moderate performance impacts (-6.7\% to unchanged) while consistently achieving emission reductions ranging from -16.0\% to -44.7\%.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{img/tradeoff_experiments_bbbp.png}
+    \caption{Trade-off comparison on BBBP}
+\end{figure}
+
+
+\subsection{CEP Dataset (Regression)}
+
+The CEP dataset showcases some of the most impressive GFT results, particularly demonstrating that regression tasks can benefit substantially from early stopping when properly configured. SELFormer achieves an exceptional +50.6\% performance improvement while reducing emissions by -59.7\%, representing one of the strongest win-win scenarios observed across all experiments.
+
+ChemBERTa-2 also delivers very good results with +16.9\% performance improvement and -68.6\% emission reduction, while ChemBERTa shows modest but positive gains (+5.5\% performance, -41.2\% emissions). SMILES-BERT maintains stable performance (+2.9\%) with substantial emission savings (-68.4\%).
+
+GraphMAE models present a clear trade-off pattern where shorter warmup periods (W10) result in larger performance degradations (-27.8\%) but achieve the most dramatic emission reductions (-89.9\%). Longer warmup periods (W50) moderate the performance impact (-8.8\%) while still achieving significant emission savings (-49.6\%). This demonstrates the critical importance of warmup tuning for regression tasks with graph-based models.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{img/tradeoff_experiments_cep.png}
+    \caption{Trade-off comparison on CEP}
+\end{figure}
+
+\subsection{Lipophilicity Dataset (Regression)}
+Metrics: RSE (lower is better).
+
+The Lipophilicity dataset presents the most challenging scenario for GFT implementation, with most models experiencing performance degradations when early stopping is applied. This suggests that lipophilicity prediction requires extended fine tuning periods to achieve optimal performance.
+
+SELFormer stands out as the only consistently positive case with a modest +0.9\% improvement and -13.7\% emission reduction. ChemBERTa-2 maintains nearly identical performance (-0.1\%) while achieving substantial emission savings (-58.5\%), making it a viable GFT option.
+
+The most concerning results come from GraphMAE models, particularly with shorter warmup periods. GraphMAE W10 shows a dramatic -59.3\% performance degradation, despite achieving -89.6\% emission reduction. Even GraphMAE W50 shows significant performance loss (-12.6\%) with -50.6\% emission savings.
+
+ChemBERTa and SMILES-BERT show moderate performance impacts (-10.7\% to -14.6\%) while achieving substantial emission reductions (-47.6\% to -72.6\%). These results highlight that for complex regression tasks like lipophilicity prediction, the trade-off between performance and emissions requires careful consideration, and extended fine tuning may be necessary for optimal results.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{img/tradeoff_experiments_lipophilicity.png}
+    \caption{Trade-off comparison on Lipophilicity}
+\end{figure}
+
+\subsection{Malaria Dataset (Regression)}
+Metrics: RSE (lower is better).
+
+The Malaria dataset demonstrates moderate success for GFT strategies with several models showing positive performance impacts alongside emission reductions. ChemBERTa-2 delivers consistent improvement (+3.3\%) with emission savings (-23.6\%), while SELFormer shows +5.9\% performance improvement, though with a slight emission increase (+10.0\%).
+
+SMILES-BERT maintains unchanged performance while achieving substantial emission reduction (-63.5\%), representing an ideal efficiency scenario. ChemBERTa shows the only clear negative trade-off with -8.7\% performance degradation and +11.7\% emission increase, suggesting poor optimization dynamics for this model-dataset combination.
+
+GraphMAE models demonstrate interesting patterns across warmup configurations. W10 shows slight performance degradation (-2.0\%) with good emission savings (-38.1\%), while W25 and W50 both achieve performance improvements (+2.7\% and +4.3\% respectively) with emission reductions (-17.8\% and -7.9\%). This suggests that longer warmup periods are beneficial for the Malaria dataset, allowing GraphMAE to find better optimization paths while maintaining efficiency gains.
+
+Overall, the Malaria dataset shows that with proper model selection and configuration, regression tasks can achieve both performance and efficiency improvements.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{img/tradeoff_experiments_malaria.png}
+    \caption{Trade-off comparison on Malaria}
+\end{figure}
+
+\subsection{Explainability Analysis}
+\subsubsection{Motivation and Methodology}
+Understanding which factors most influence model emissions and performance is crucial for optimizing GFT. To address this,a comprehensive explainability analysis using \textbf{Partial Correlation}, a statistical technique that isolates the unique contribution of each feature while controlling for all other variables, was conducted. This approach is particularly valuable when dealing with multicollinearity among features, which is common in machine learning experiments where multiple factors interact.
+
+\subsubsection{Feature Engineering}
+For each experiment, a comprehensive set of features was engineered to capture relevant aspects of model architecture, fine tuning configuration, dataset characteristics, and fine tuning strategy. The features included:
+
+\begin{itemize}
+    \item \textbf{Model Architecture Features}: Number of parameters, hidden size, number of layers, model family (Transformer vs GNN)
+    \item \textbf{Fine tuning Configuration}: Epochs provided, epochs used, warmup epochs, epoch efficiency (ratio of epochs used to epochs provided)
+    \item \textbf{Dataset Characteristics}: Dataset size, average molecular weight, task type (classification vs regression)
+    \item \textbf{Fine tuning Strategy}: Binary indicator for early stopping usage
+\end{itemize}
+
+All features were standardized using z-score normalization before analysis to ensure fair comparison across different scales.
+
+\subsubsection{Key Findings}
+
+\paragraph{Factors Influencing Emissions}
+The partial correlation analysis reveals the following hierarchy of importance for predicting CO$_2$ emissions:
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{img/partial_correlation_importance.png}
+    \caption{Feature importance for emissions (left) and performance (right) based on partial correlation analysis. The values shown are normalized relative contributions, with $\rho$ indicating the direction and strength of the partial correlation.}
+\end{figure}
+
+\textbf{Top emission drivers:}
+\begin{enumerate}
+    \item \textbf{Dataset Size} ($\rho = 0.65$): Largest contributor to emissions. Larger datasets require more computational resources per epoch and often necessitate longer fine tuning.
+    \item \textbf{Epoch Efficiency} ($\rho = 0.26$): Positive correlation indicates that longer fine tuning (higher epoch usage ratio) directly increases emissions.
+    \item \textbf{Epochs Used} ($\rho = -0.22$): Interestingly shows negative correlation when controlling for other factors, suggesting interaction effects with dataset size and efficiency.
+    \item \textbf{Model Architecture} (num\_layers, hidden\_size): Moderate influence ($\rho \approx 0.12-0.13$), indicating that while model size matters, it's less critical than dataset size and fine tuning duration.
+\end{enumerate}
+
+Notably, \textbf{early stopping usage} shows minimal direct impact ($\rho = -0.05$), suggesting its emission reduction benefits are mediated primarily through reducing epochs used rather than any inherent efficiency gain.
+
+\paragraph{Factors Influencing Performance}
+The performance analysis reveals a different set of priorities:
+
+\textbf{Top performance drivers:}
+\begin{enumerate}
+    \item \textbf{Average Molecular Weight} ($\rho = 0.44$): Strongest predictor, likely reflecting dataset complexity and information content.
+    \item \textbf{Dataset Size} ($\rho = 0.43$): Critical for model generalization, consistent with standard machine learning principles.
+    \item \textbf{Early Stopping Usage} ($\rho = 0.20$): Positive contribution suggests early stopping helps prevent overfitting, validating the GFT approach.
+    \item \textbf{Warmup Epochs} ($\rho = -0.19$): Negative correlation indicates that excessive warmup may delay convergence or lead to suboptimal fine tuning dynamics for some tasks.
+    \item \textbf{Model Capacity} (num\_parameters, $\rho = -0.15$): Surprisingly negative, potentially indicating overfitting with larger models or diminishing returns beyond a certain model size for these molecular tasks.
+\end{enumerate}
+
+
+\subsubsection{Implications for GFT Strategy}
+The explainability analysis provides actionable insights:
+
+\begin{enumerate}
+    \item \textbf{Prioritize Dataset Optimization}: Since dataset size is the dominant factor for emissions, techniques like data pruning, active learning, or efficient data sampling could yield substantial emission reductions.
+    \item \textbf{Early Stopping is Effective}: The positive partial correlation with performance validates that early stopping not only reduces emissions but can actually improve generalization by preventing overfitting.
+    \item \textbf{Model Size is Secondary}: The relatively small contribution of model architecture parameters suggests that emission reduction efforts should focus on fine tuning efficiency rather than always choosing smaller models, which might compromise performance disproportionately.
+    \item \textbf{Warmup Period Tuning}: The complex relationship between warmup epochs and performance across different datasets (as seen in the GraphMAE analysis) underscores the need for dataset-specific hyperparameter optimization.
+\end{enumerate}
+
